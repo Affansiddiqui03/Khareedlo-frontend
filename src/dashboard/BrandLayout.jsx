@@ -1,33 +1,38 @@
 // src/dashboard/BrandLayout.jsx
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, Box, Database, User, BarChart2, LogOut } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function BrandLayout() {
-const user = JSON.parse(localStorage.getItem("user"));
-  const brandName = user?.name || "Your Brand";
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
- const nav = [
-  { to: "/brand", label: "Overview", icon: <Home /> },
-  { to: "/brand/analytics", label: "POS Analytics", icon: <BarChart2 /> },
-  { to: "/brand/products", label: "Products", icon: <Box /> },
-  { to: "/brand/report", label: "Summary Report", icon: <Database /> },
-  { to: "/brand/profile", label: "Profile", icon: <User /> },
-];
+  // ⛔ Safety (BrandRoute already protect kar raha hai)
+  if (!user || user.role !== "brand") {
+    navigate("/auth", { replace: true });
+    return null;
+  }
 
+  const brandName = user.name || "Your Brand";
+
+  const nav = [
+    { to: "/brand", label: "Overview", icon: <Home /> },
+    { to: "/brand/analytics", label: "POS Analytics", icon: <BarChart2 /> },
+    { to: "/brand/products", label: "Products", icon: <Box /> },
+    { to: "/brand/report", label: "Summary Report", icon: <Database /> },
+    { to: "/brand/profile", label: "Profile", icon: <User /> },
+  ];
+
+  console.log(user)
 
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
       <aside className="w-72 bg-white shadow-md border-r hidden md:block">
-        <div className="px-6 py-6 flex items-center gap-3 sticky top-0 bg-white">
-          <div className="h-12 w-12 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-            K
-          </div>
-          <div>
-            <div className="font-bold text-lg text-indigo-700">KHAREEDLO</div>
-            <div className="text-sm text-gray-500">Brand Dashboard</div>
-            <div className="text-xs text-gray-400 mt-1">Hi, {brandName}</div>
-          </div>
+        <div className="px-6 py-6">
+          <div className="font-bold text-lg text-indigo-700">KHAREEDLO</div>
+          <div className="text-sm text-gray-500">Brand Dashboard</div>
+          <div className="text-xs text-gray-400 mt-1">Hi, {brandName}</div>
         </div>
 
         <nav className="px-4 py-6">
@@ -38,7 +43,7 @@ const user = JSON.parse(localStorage.getItem("user"));
                   end={n.to === "/brand"}
                   to={n.to}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-md transition ${
+                    `flex items-center gap-3 px-3 py-2 rounded-md ${
                       isActive
                         ? "bg-indigo-50 text-indigo-700 font-semibold"
                         : "text-gray-700 hover:bg-gray-50"
@@ -52,16 +57,16 @@ const user = JSON.parse(localStorage.getItem("user"));
             ))}
           </ul>
 
-          <div className="mt-8 border-t pt-4 space-y-2">
+          <div className="mt-8 border-t pt-4">
             <button
               onClick={() => {
-                localStorage.removeItem("user");
-                window.location.href = "/";
+                logout();
+                navigate("/");
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50"
+              className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50"
             >
               <LogOut className="w-5 h-5" />
-              <span>Logout</span>
+              Logout
             </button>
           </div>
         </nav>

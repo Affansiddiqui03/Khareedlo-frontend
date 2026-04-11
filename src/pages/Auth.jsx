@@ -1,11 +1,15 @@
 // src/pages/Auth.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+
 
 export default function Auth() {
   const navigate = useNavigate();
 
   // ---------- General State ----------
+  const { login } = useAuth();
+
   const [isLogin, setIsLogin] = useState(true);
   const [mode, setMode] = useState("customer"); // "customer" | "brand"
   const [loading, setLoading] = useState(false);
@@ -18,23 +22,21 @@ export default function Auth() {
   const [custConfirm, setCustConfirm] = useState("");
 
   // ---------- Brand State ----------
-  const [brandIdentifier, setBrandIdentifier] = useState("");
-  const [brandPassword, setBrandPassword] = useState("");
+
   const [brandName, setBrandName] = useState("");
   const [brandEmail, setBrandEmail] = useState("");
   const [brandConfirm, setBrandConfirm] = useState("");
-  const [setBrandLogoFile] = useState(null);
+  const [brandLogoFile, setBrandLogoFile] = useState(null);
   const [brandLogoPreview, setBrandLogoPreview] = useState(null);
-  const [brandCategory, setBrandCategory] = useState("");
-  const [brandAddress, setBrandAddress] = useState("");
-  const [brandCity, setBrandCity] = useState("");
   const [brandContact, setBrandContact] = useState("");
-  const [brandDesc, setBrandDesc] = useState("");
   const [brandWebsite, setBrandWebsite] = useState("");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   // ---------- Helpers ----------
   const simpleEmail = (s) => /\S+@\S+\.\S+/.test(s);
-  const simplePhone = (s) => /^\+?[\d\s-]{7,15}$/.test(s);
+  // const simplePhone = (s) => /^\+?[\d\s-]{7,15}$/.test(s);
 
   const switchMode = (m) => {
     setMode(m);
@@ -42,13 +44,28 @@ export default function Auth() {
   };
 
   const handleLogoChange = (e) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setBrandLogoFile(f);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // ✅ file type validation
+    if (!file.type.startsWith("image/")) {
+      setMsg("Only image files are allowed");
+      return;
+    }
+
+    // ✅ size validation (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setMsg("Logo size must be under 2MB");
+      return;
+    }
+
+    setBrandLogoFile(file);
+
     const reader = new FileReader();
     reader.onload = () => setBrandLogoPreview(reader.result);
-    reader.readAsDataURL(f);
+    reader.readAsDataURL(file);
   };
+
 
   // ---------- Customer Submit ----------
   const handleCustomerSubmit = async (e) => {
@@ -79,9 +96,14 @@ export default function Auth() {
           return;
         }
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/brand");
+        login({
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          role: "customer",
+        });
+
+        navigate("/");
       } else {
         // 📝 CUSTOMER REGISTER (REAL)
         if (!custName) return setMsg("Name required");
@@ -119,115 +141,151 @@ export default function Auth() {
     }
   };
 
-  // ---------- Brand Submit ----------
- const handleBrandSubmit = async (e) => {
-  e.preventDefault();
-  setMsg(null);
-  setLoading(true);
+  const handleBrandLogin = async (e) => {
+    e.preventDefault();
+    setMsg(null);
+    setLoading(true);
 
-  try {
-    if (isLogin) {
-      // ✅ Brand Login with real API
-      if (!brandIdentifier || !brandPassword) {
-        setMsg("Email & password required");
-        setLoading(false);
-        return;
-      }
-
+    try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: brandIdentifier, // map identifier to email
-          password: brandPassword,
+          email: email,
+          password: password,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMsg(data.error || "Login failed");
-        setLoading(false);
+        setMsg(data.message || "Login failed");
         return;
       }
 
-      // ✅ Store actual backend response
-      localStorage.setItem("user", JSON.stringify(data));
+      if (data.user.role !== "brand") {
+        setMsg("Not a brand account");
+        return;
+      }
 
-      navigate("/brand"); // dashboard
-    } else {
-      // Brand Registration (demo/localStorage)
-      if (!brandName) return setMsg("Brand name required");
-      if (!simpleEmail(brandEmail)) return setMsg("Valid email required");
-      if (!brandPassword || brandPassword.length < 6)
-        return setMsg("Password min 6 chars");
-      if (brandPassword !== brandConfirm)
-        return setMsg("Passwords do not match");
-      if (!brandCategory) return setMsg("Select brand category");
-      if (!brandContact || !simplePhone(brandContact))
-        return setMsg("Valid contact required");
+      login(data.user);
+      navigate("/brand");
 
-      // Save brand info in localStorage for demo
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          brandId: Math.floor(Math.random() * 1000) + 100,
-          name: brandName,
-          role: "brand",
-          email: brandEmail,
-          category: brandCategory,
-          address: brandAddress,
-          city: brandCity,
-          contact: brandContact,
-          desc: brandDesc,
-          website: brandWebsite,
-        })
-      );
-
-      setMsg("Brand registered. Dashboard available after admin approval.");
-      // Reset form fields
-      setBrandName("");
-      setBrandEmail("");
-      setBrandPassword("");
-      setBrandConfirm("");
-      setBrandCategory("");
-      setBrandAddress("");
-      setBrandCity("");
-      setBrandContact("");
-      setBrandDesc("");
-      setBrandWebsite("");
-      setBrandLogoPreview(null);
-      setIsLogin(true);
+    } catch (err) {
+      setMsg("Server error");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setMsg("Server error. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+
+  // ---------- Brand Submit ----------
+  // ---------- Brand Submit ----------
+  const handleBrandSubmit = async (e) => {
+    e.preventDefault();
+    setMsg(null);
+    setLoading(true);
+
+    try {
+      if (password !== brandConfirm) {
+        setMsg("Passwords do not match");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("brandName", brandName);
+      formData.append("email", brandEmail);
+      formData.append("password", password);
+      formData.append("contact", brandContact);
+      formData.append("website", brandWebsite);
+      formData.append("logo", brandLogoFile); // ✅ LOGO
+
+      const res = await fetch("http://localhost:5000/api/brand/register", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMsg(data.message || "Registration failed");
+        return;
+      }
+
+      setMsg("Brand registered successfully. Waiting for admin approval.");
+      setIsLogin(true);
+      setMode("brand");
+
+    } catch (err) {
+      setMsg("Server error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+  const handleAdminLogin = async () => {
+    setMsg(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMsg(data.message || "Login failed");
+        return;
+      }
+
+      if (data.user.role !== "admin") {
+        setMsg("Not an admin account");
+        return;
+      }
+
+      login(data.user);
+      navigate("/admin");
+    } catch (err) {
+      setMsg("Server error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
 
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-600 via-slate-400 to-red-500 animate-gradient bg-[length:400%_400%] p-4">
-      <div className="relative bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-3xl p-6 w-full max-w-2xl overflow-hidden">
+      <button
+        onClick={ handleAdminLogin }
+        className="absolute top-20 right-4 px-3 py-5 mr-3 rounded-full text-sm font-medium bg-white/20 text-white font-bold hover:bg-black/60"
+      >
+        Admin
+      </button>
+      <div className="relative bg-white/10 backdrop-blur-3xl border border-white/20  shadow-2xl rounded-3xl p-6 w-full max-w-2xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-
-        {/* Top toggles */}
+        {/* Top toggles */ }
         <div className="flex justify-between items-center mb-4">
           <div>
             <button
-              onClick={() => setIsLogin(true)}
-              className={`px-3 py-1 rounded-full font-semibold ${
-                isLogin ? "bg-white/25 text-white" : "text-white/80"
-              }`}
+              onClick={ () => setIsLogin(true) }
+              className={ `px-3 py-2 rounded-full font-semibold ${isLogin ? "bg-white/25 text-white" : "text-white/80"
+                }` }
             >
               Login
             </button>
             <button
-              onClick={() => setIsLogin(false)}
-              className={`px-3 py-1 rounded-full font-semibold ${
-                !isLogin ? "bg-white/25 text-white" : "text-white/80"
-              }`}
+              onClick={ () => setIsLogin(false) }
+              className={ `px-3 py-2 rounded-full font-semibold ${!isLogin ? "bg-white/25 text-white" : "text-white/80"
+                }` }
             >
               Register
             </button>
@@ -235,240 +293,195 @@ export default function Auth() {
 
           <div>
             <button
-              onClick={() => switchMode("customer")}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition ${
-                mode === "customer" ? "bg-white/25 text-white" : "text-white/80"
-              }`}
+              onClick={ () => switchMode("customer") }
+              className={ `px-3 py-2 rounded-full text-sm font-medium transition ${mode === "customer" ? "bg-white/25 text-white" : "text-white/80"
+                }` }
             >
               Customer
             </button>
             <button
-              onClick={() => switchMode("brand")}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition ${
-                mode === "brand" ? "bg-white/25 text-white" : "text-white/80"
-              }`}
+              onClick={ () => switchMode("brand") }
+              className={ `px-3 py-2 rounded-full text-sm font-medium transition ${mode === "brand" ? "bg-white/25 text-white" : "text-white/80"
+                }` }
             >
               Brand
             </button>
           </div>
         </div>
 
-        {/* Title & description */}
+        {/* Title & description */ }
         <h1 className="text-3xl font-extrabold text-white text-center mb-1 drop-shadow-lg">
-          {isLogin
+          { isLogin
             ? mode === "customer"
               ? "Customer Login!"
               : "Brand Login"
             : mode === "customer"
-            ? "Create Your Account"
-            : "Register Your Brand"}
+              ? "Create Your Account"
+              : "Register Your Brand" }
         </h1>
         <p className="text-white/80 text-center mb-6 text-sm">
-          {isLogin
+          { isLogin
             ? mode === "customer"
               ? "Sign in to continue"
               : "Brand login to manage products & orders"
             : mode === "customer"
-            ? "Join KHAREEDLO and start shopping"
-            : "Register your brand to upload inventory and get orders"}
+              ? "Join KHAREEDLO and start shopping"
+              : "Register your brand to upload inventory and get orders" }
         </p>
 
-        {/* Message */}
-        {msg && (
+        {/* Message */ }
+        { msg && (
           <div className="text-sm text-center text-white/90 bg-white/10 p-3 rounded-lg mb-3">
-            {msg}
+            { msg }
           </div>
-        )}
+        ) }
 
-        {/* Customer Form */}
-        {mode === "customer" && (
-          <form onSubmit={handleCustomerSubmit} className="space-y-3">
-            {!isLogin && (
+        {/* Customer Form */ }
+        { mode === "customer" && (
+          <form onSubmit={ handleCustomerSubmit } className="space-y-3">
+            { !isLogin && (
               <input
-                value={custName}
-                onChange={(e) => setCustName(e.target.value)}
+                value={ custName }
+                onChange={ (e) => setCustName(e.target.value) }
                 placeholder="Full Name"
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
               />
-            )}
+            ) }
             <input
-              value={custEmail}
-              onChange={(e) => setCustEmail(e.target.value)}
+              value={ custEmail }
+              onChange={ (e) => setCustEmail(e.target.value) }
               type="email"
               placeholder="Email"
               className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
             />
             <input
-              value={custPassword}
-              onChange={(e) => setCustPassword(e.target.value)}
+              value={ custPassword }
+              onChange={ (e) => setCustPassword(e.target.value) }
               type="password"
               placeholder="Password"
               className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
             />
-            {!isLogin && (
+            { !isLogin && (
               <input
-                value={custConfirm}
-                onChange={(e) => setCustConfirm(e.target.value)}
+                value={ custConfirm }
+                onChange={ (e) => setCustConfirm(e.target.value) }
                 type="password"
                 placeholder="Confirm Password"
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
               />
-            )}
+            ) }
             <button
               type="submit"
-              disabled={loading}
+              disabled={ loading }
               className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-orange-500 via-orange-300 to-red-500 text-white font-semibold text-lg shadow-lg hover:scale-[1.02] transition"
             >
-              {loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
+              { loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up" }
             </button>
           </form>
-        )}
+        ) }
 
-        {/* Brand Form */}
-        {mode === "brand" && (
-          <form onSubmit={handleBrandSubmit} className="space-y-3">
-            {isLogin ? (
+        {/* Brand Form */ }
+        { mode === "brand" && (
+          <form
+            onSubmit={ isLogin ? handleBrandLogin : handleBrandSubmit }
+            className="space-y-3"
+          >
+            { isLogin ? (
               <>
                 <input
-                  value={brandIdentifier}
-                  onChange={(e) => setBrandIdentifier(e.target.value)}
+                  value={ email }
+                  onChange={ (e) => setEmail(e.target.value) }
                   placeholder="Username or Email"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
                 <input
-                  value={brandPassword}
-                  onChange={(e) => setBrandPassword(e.target.value)}
+                  value={ password }
+                  onChange={ (e) => setPassword(e.target.value) }
                   type="password"
                   placeholder="Password"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={ loading }
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500  to-red-500 text-white font-semibold shadow-lg"
                 >
-                  {loading ? "Please wait..." : "Brand Login"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // ✅ Demo Brand Login with brandId
-                    localStorage.setItem(
-                      "user",
-                      JSON.stringify({ brandId: 101, name: "Demo Brand", role: "brand" })
-                    );
-                    navigate("/brand");
-                  }}
-                  className="w-full py-3 mt-2 rounded-xl bg-green-600 text-white font-semibold shadow-lg hover:scale-105 transition"
-                >
-                  Demo Brand Login
+                  { loading ? "Please wait..." : "Brand Login" }
                 </button>
               </>
             ) : (
               <>
                 <input
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
+                  value={ brandName }
+                  onChange={ (e) => setBrandName(e.target.value) }
                   placeholder="Brand Name"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
                 <input
-                  value={brandEmail}
-                  onChange={(e) => setBrandEmail(e.target.value)}
+                  value={ brandEmail }
+                  onChange={ (e) => setBrandEmail(e.target.value) }
                   type="email"
                   placeholder="Brand Email"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
                 <input
-                  value={brandPassword}
-                  onChange={(e) => setBrandPassword(e.target.value)}
+                  value={ password }
+                  onChange={ (e) => setPassword(e.target.value) }
                   type="password"
                   placeholder="Password"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
                 <input
-                  value={brandConfirm}
-                  onChange={(e) => setBrandConfirm(e.target.value)}
+                  value={ brandConfirm }
+                  onChange={ (e) => setBrandConfirm(e.target.value) }
                   type="password"
                   placeholder="Confirm Password"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
 
-                {/* Logo */}
+                {/* Logo */ }
                 <div className="flex items-center space-x-3">
                   <label className="text-sm text-white/80 font-medium">Brand Logo</label>
                   <input
-                    onChange={handleLogoChange}
+                    onChange={ handleLogoChange }
                     type="file"
                     accept="image/*"
                     className="text-sm text-white/70"
                   />
-                  {brandLogoPreview && (
+                  { brandLogoPreview && (
                     <img
-                      src={brandLogoPreview}
+                      src={ brandLogoPreview }
                       alt="logo preview"
                       className="h-12 w-12 rounded-md object-cover border"
                     />
-                  )}
+                  ) }
                 </div>
 
-                {/* Other Info */}
-                <select
-                  value={brandCategory}
-                  onChange={(e) => setBrandCategory(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
-                >
-                  <option value="">Select Category</option>
-                  <option value="mens">Men's Wear</option>
-                  <option value="womens">Women's Wear</option>
-                  <option value="kids">Kids</option>
-                  <option value="unstitched">Unstitched</option>
-                  <option value="formal">Formal</option>
-                  <option value="casual">Casual</option>
-                </select>
+                {/* Other Info */ }
                 <input
-                  value={brandAddress}
-                  onChange={(e) => setBrandAddress(e.target.value)}
-                  placeholder="Business / Outlet Address"
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
-                />
-                <input
-                  value={brandCity}
-                  onChange={(e) => setBrandCity(e.target.value)}
-                  placeholder="City"
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
-                />
-                <input
-                  value={brandContact}
-                  onChange={(e) => setBrandContact(e.target.value)}
+                  value={ brandContact }
+                  onChange={ (e) => setBrandContact(e.target.value) }
                   placeholder="Contact Number (+92...)"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
-                <textarea
-                  value={brandDesc}
-                  onChange={(e) => setBrandDesc(e.target.value)}
-                  placeholder="Description / About Brand"
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
-                  rows={3}
-                />
                 <input
-                  value={brandWebsite}
-                  onChange={(e) => setBrandWebsite(e.target.value)}
+                  value={ brandWebsite }
+                  onChange={ (e) => setBrandWebsite(e.target.value) }
                   placeholder="Website or Social Link (optional)"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={ loading }
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 via-white/30 to-red-500 text-white font-semibold shadow-lg"
                 >
-                  {loading ? "Please wait..." : "Register Brand"}
+                  { loading ? "Please wait..." : "Register Brand" }
                 </button>
               </>
-            )}
+            ) }
           </form>
-        )}
+        ) }
       </div>
     </div>
   );

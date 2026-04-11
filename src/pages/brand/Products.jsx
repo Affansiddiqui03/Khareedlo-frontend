@@ -1,36 +1,25 @@
 // src/pages/brand/Products.jsx
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Products() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const brandId = user?.id;
+
     useEffect(() => {
-   const stored = JSON.parse(localStorage.getItem("brandProducts"));
+        if (!brandId) return;
 
-  if (!stored || stored.length === 0) {
-    const mock = [
-      {
-        id: 1,
-        name: "Black Kurti",
-        price: 1999,
-        stock: 12,
-        image: "/product1.jpg"
-      },
-      {
-        id: 2,
-        name: "Men's Casual Shirt",
-        price: 2499,
-        stock: 8,
-        image: "/product2.jpg"
-      }
-    ];
+        fetch(`/api/brand/products/${brandId}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("Brand products:", data); // 👈 ADD THIS
+                setProducts(data);
+            })
+            .catch(err => console.error(err));
+    }, [brandId]);
 
-    setProducts(mock);
-    localStorage.setItem("brandProducts", JSON.stringify(mock));
-  } else {
-    setProducts(stored);
-  }
-}, []);
+
 
     const navigate = useNavigate();
 
@@ -53,29 +42,35 @@ export default function Products() {
     const handleAdd = async (e) => {
         e.preventDefault();
         setIsSaving(true);
-        try {
-            const newItem = {
-                id: Date.now(),
-                name: form.name,
-                price: Number(form.price || 0),
-                stock: Number(form.stock || 0),
-                category: form.category || "",
-                description: form.description || "",
-                image: form.image, // must be provided by you from your uploader
-            };
-            setProducts((p) => [newItem, ...p]);
-            setShowAdd(false);
-            resetForm();
-        } finally {
-            setIsSaving(false);
-        }
+
+        // 1️⃣ ADD PRODUCT (DB mein save)
+        await fetch("/api/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ...form,
+                brand_id: brandId,
+            }),
+        });
+
+        // 2️⃣ RE-FETCH BRAND PRODUCTS
+        const res = await fetch(`/api/brand/products/${brandId}`);
+        setProducts(await res.json());
+
+        setIsSaving(false);
+        setShowAdd(false);
+        resetForm();
     };
 
+
+
     const askDelete = (id) => setShowDeleteConfirm(id);
-    const handleDeleteConfirm = () => {
-        setProducts((p) => p.filter((x) => x.id !== showDeleteConfirm));
+    const handleDeleteConfirm = async () => {
+        await fetch(`/api/products/${showDeleteConfirm}`, { method: "DELETE" });
+        setProducts(products.filter(p => p.id !== showDeleteConfirm));
         setShowDeleteConfirm(null);
     };
+
 
     return (
         <div>
@@ -94,16 +89,16 @@ export default function Products() {
                 { products.map((item) => (
                     <div key={ item.id } className="bg-white p-4 rounded-2xl shadow hover:shadow-lg transition">
                         {/* no default image — uses your uploaded URL */ }
-                        { item.image ? (
-                            <img src={ item.image } alt={ item.name } className="h-40 w-full object-cover rounded-lg mb-3" />
-                        ) : (
+                        { (
                             <div className="h-40 w-full bg-gray-100 rounded-lg mb-3 flex items-center justify-center text-gray-400 text-sm">
                                 No image
                             </div>
                         ) }
 
-                        <h3 className="font-semibold text-gray-800">{ item.name }</h3>
-                        <p className="text-gray-500 text-sm">PKR { item.price }</p>
+                        <h3 className="font-semibold text-gray-800">
+                            { item.name || item.title }
+
+                        </h3>                        <p className="text-gray-500 text-sm">PKR { item.price }</p>
                         <p className="text-sm text-gray-600 mt-1">
                             Stock: <span className="font-medium">{ item.stock }</span>
                         </p>
@@ -141,8 +136,16 @@ export default function Products() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <input required placeholder="Name" value={ form.name } onChange={ (e) => setForm({ ...form, name: e.target.value }) } className="p-3 border rounded" />
                             <input required type="number" placeholder="Price" value={ form.price } onChange={ (e) => setForm({ ...form, price: e.target.value }) } className="p-3 border rounded" />
-                            <input placeholder="Category" value={ form.category } onChange={ (e) => setForm({ ...form, category: e.target.value }) } className="p-3 border rounded" />
-                            <input type="number" placeholder="Stock" value={ form.stock } onChange={ (e) => setForm({ ...form, stock: e.target.value }) } className="p-3 border rounded" />
+                            <select
+                                value={ form.category }
+                                onChange={ e => setForm({ ...form, category: e.target.value }) }
+                                className="p-3 border rounded"
+                            >
+                                <option value="">Select Category</option>
+                                <option value="1">Men</option>
+                                <option value="2">Women</option>
+                                <option value="3">Kids</option>
+                            </select>                            <input type="number" placeholder="Stock" value={ form.stock } onChange={ (e) => setForm({ ...form, stock: e.target.value }) } className="p-3 border rounded" />
                             <input placeholder="Image URL (from your uploader)" value={ form.image } onChange={ (e) => setForm({ ...form, image: e.target.value }) } className="p-3 border rounded md:col-span-2" />
                         </div>
                         <textarea placeholder="Description" value={ form.description } onChange={ (e) => setForm({ ...form, description: e.target.value }) } className="w-full mt-3 p-3 border rounded" rows={ 3 } />

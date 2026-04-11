@@ -1,13 +1,11 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { User, Heart, Settings, ShoppingBag, LayoutDashboard } from "lucide-react";
+import { User, Settings, LayoutDashboard } from "lucide-react";
 
 export default function UserSidebar() {
     const links = [
         { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
         { to: "/dashboard/profile", label: "Profile", icon: <User className="w-5 h-5" /> },
-        { to: "/dashboard/orders", label: "My Orders", icon: <ShoppingBag className="w-5 h-5" /> },
-        { to: "/dashboard/wishlist", label: "Wishlist", icon: <Heart className="w-5 h-5" /> },
         { to: "/dashboard/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
     ];
 

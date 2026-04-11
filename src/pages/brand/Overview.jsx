@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Package, ShoppingCart, Zap } from "lucide-react";
 import Card from "../../components/Card";
+import { useAuth } from "../../contexts/AuthContext";
+
 
 export default function Overview() {
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const brandName = user?.name || "Your Brand";
-  const brandId = user?.brandId;
+const { user } = useAuth();
+const brandId = user?.id;
+const brandName = user?.name || "Your Brand";
 
   const [stats, setStats] = useState({
     total_products: 0,
@@ -17,22 +19,18 @@ export default function Overview() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!brandId) {
-      // For demo: provide dummy stats instead of crashing
-      setStats({
-        total_products: 5,
-        cart_clicks: 20,
-        buy_clicks: 8,
-      });
-      setLoading(false);
-      return;
-    }
+  console.log("OVERVIEW brandId:", brandId);
+}, [brandId]);
+
+  useEffect(() => {
+if (!brandId) return;
+
 
     const fetchStats = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/brand-admin/overview/${brandId}`);
+        const res = await fetch(`http://localhost:5000/api/brand/overview/${brandId}`)
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
         setStats(data);
@@ -83,7 +81,7 @@ export default function Overview() {
           />
           <Card
             title="Top Product"
-            value="Auto (Most Clicked)"
+            value="0"
             icon={<Zap className="w-6 h-6 text-purple-500" />}
           />
         </div>

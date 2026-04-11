@@ -2,19 +2,25 @@ import React, { useEffect, useState } from "react";
 
 export default function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
-  const brandId = user?.brandId;
+const brandId = user?.id;
 
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`/api/brand-profile/${brandId}`)
-      .then(res => res.json())
-      .then(data => {
-        setForm(data);
-        setLoading(false);
-      });
-  }, [brandId]);
+useEffect(() => {
+  if (!brandId) return;
+
+  fetch(`http://localhost:5000/api/brand-profile/${brandId}`)
+    .then(res => res.json())
+    .then(data => {
+      setForm(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+}, [brandId]);
 
   const handleSave = async () => {
     await fetch(`/api/brand-profile/${brandId}`, {
