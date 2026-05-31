@@ -30,7 +30,7 @@ export default function AdminApprovals() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/admin/pending-products");
+      const res = await fetch("http://localhost:5000/api/admin/pending-products");
       const data = res.ok ? await res.json() : [];
       setProducts(Array.isArray(data) ? data : []);
     } catch {
@@ -45,7 +45,7 @@ export default function AdminApprovals() {
   const handleAction = async (productId, status) => {
     setProcessing(productId + status);
     try {
-      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/admin/products/${productId}/status`, {
+      const res = await fetch(`http://localhost:5000/api/admin/products/${productId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -197,7 +197,7 @@ export default function AdminApprovals() {
                           <div className="flex items-center gap-3">
                             <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
                               {p.image && p.image !== "photos/" ? (
-                                <img src={`https://khareedlo-backend-production.up.railway.app/${p.image}`} alt={p.product_name}
+                                <img src={`http://localhost:5000/${p.image}`} alt={p.product_name}
                                   className="w-full h-full object-cover"
                                   onError={e => e.target.style.display = "none"} />
                               ) : (
@@ -295,7 +295,7 @@ export default function AdminApprovals() {
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="h-64 bg-gray-100 overflow-hidden">
               {preview.image && preview.image !== "photos/" ? (
-                <img src={`https://khareedlo-backend-production.up.railway.app/${preview.image}`} alt={preview.product_name}
+                <img src={`http://localhost:5000/${preview.image}`} alt={preview.product_name}
                   className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

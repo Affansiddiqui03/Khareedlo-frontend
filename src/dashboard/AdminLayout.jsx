@@ -5,8 +5,8 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, Navigate } from "react-router-dom";
 import {
   LayoutDashboard, Store, Box, Users, ShieldCheck,
-  LogOut, Bell, Menu, MessageSquare,
-  Settings, Database,
+  LogOut, Bell, Menu, X, MessageSquare,
+  RefreshCw, Settings, Database,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -20,7 +20,7 @@ export default function AdminLayout({ children }) {
     if (!user || user.role !== "admin") return;
     const fetchUnread = async () => {
       try {
-        const res  = await fetch("https://khareedlo-backend-production.up.railway.app/api/contact/unread-count");
+        const res  = await fetch("http://localhost:5000/api/contact/unread-count");
         const data = await res.json();
         setUnreadMsgs(data.count || 0);
       } catch {}

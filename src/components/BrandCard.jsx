@@ -66,8 +66,8 @@ export default function BrandCard({ brand }) {
   useEffect(() => {
     if (!brandId) return;
     const url = user?.id
-      ? `https://khareedlo-backend-production.up.railway.app/api/ratings/brand/${brandId}?customer_id=${user.id}`
-      : `https://khareedlo-backend-production.up.railway.app/api/ratings/brand/${brandId}`;
+      ? `http://localhost:5000/api/ratings/brand/${brandId}?customer_id=${user.id}`
+      : `http://localhost:5000/api/ratings/brand/${brandId}`;
 
     fetch(url)
       .then(r => r.json())
@@ -100,7 +100,7 @@ export default function BrandCard({ brand }) {
   };
 
   const hardcodedLogo = HARDCODED_LOGOS[brand.name];
-  const dynamicLogo   = brand.logo ? `https://khareedlo-backend-production.up.railway.app/${brand.logo}` : null;
+  const dynamicLogo   = brand.logo ? `http://localhost:5000/${brand.logo}` : null;
   const logoSrc       = hardcodedLogo || dynamicLogo;
   const gradient      = getBrandGradient(brand.name);
 

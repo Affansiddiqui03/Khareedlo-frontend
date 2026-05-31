@@ -31,7 +31,7 @@ export default function ProductCard({ product, onAddToCart, disableAdd }) {
   // Check if user already rated this product
   useEffect(() => {
     if (!user?.id || !product.id) return;
-    fetch(`https://khareedlo-backend-production.up.railway.app/api/ratings/product/${product.id}?customer_id=${user.id}`)
+    fetch(`http://localhost:5000/api/ratings/product/${product.id}?customer_id=${user.id}`)
       .then(r => r.json())
       .then(data => {
         setAvgRating(data.avg_rating || 0);
@@ -84,8 +84,8 @@ export default function ProductCard({ product, onAddToCart, disableAdd }) {
   const imgSrc = product.image && product.image !== "photos/" && product.image !== ""
     ? product.image.startsWith("http")
       ? product.image
-      : `https://khareedlo-backend-production.up.railway.app/${product.image}`
-    : `https://khareedlo-backend-production.up.railway.app/photos/placeholder.png`;
+      : `http://localhost:5000/${product.image}`
+    : `http://localhost:5000/photos/placeholder.png`;
 
   return (
     <>
@@ -95,7 +95,7 @@ export default function ProductCard({ product, onAddToCart, disableAdd }) {
             <img
               src={imgSrc}
               alt={product.title || product.product_name}
-              onError={e => { e.currentTarget.src = "https://khareedlo-backend-production.up.railway.app/photos/placeholder.png"; }}
+              onError={e => { e.currentTarget.src = "http://localhost:5000/photos/placeholder.png"; }}
               className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {product.trending && (

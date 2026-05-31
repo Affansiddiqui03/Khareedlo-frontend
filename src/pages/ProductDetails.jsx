@@ -85,7 +85,6 @@ export default function ProductDetail() {
 
   const compareProduct = comparePool.find(p => String(p.id || p.product_id) === String(compareId));
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setLoading(true);
     fetch(`${IMG_BASE}/api/products/${id}`).then(r => r.json()).then(d => { setProduct(d); setLoading(false); }).catch(() => setLoading(false));
@@ -114,7 +113,6 @@ export default function ProductDetail() {
     }).catch(() => {});
   }, [user?.id, product?.id]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!id) return;
     const url = user?.id ? `${IMG_BASE}/api/ratings/product/${id}?customer_id=${user.id}` : `${IMG_BASE}/api/ratings/product/${id}`;

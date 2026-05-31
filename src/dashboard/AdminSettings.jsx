@@ -1,11 +1,11 @@
 // src/dashboard/AdminSettings.jsx
 // Admin platform settings — email config status, platform info, about
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import {
   Settings, Mail, CheckCircle, AlertCircle,
-  Info, Shield, RefreshCw,
+  Info, Shield, Globe, Code, RefreshCw,
 } from "lucide-react";
 
 function SettingRow({ icon: Icon, label, children, description }) {
@@ -37,7 +37,7 @@ export default function AdminSettings() {
   const testEmail = async () => {
     setTestLoading(true);
     try {
-      const res  = await fetch("https://khareedlo-backend-production.up.railway.app/api/contact/unread-count");
+      const res  = await fetch("http://localhost:5000/api/contact/unread-count");
       if (res.ok) {
         setEmailStatus("ok");
         showToast("Backend connection is working. Email depends on EMAIL_PASS in .env");

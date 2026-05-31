@@ -28,7 +28,7 @@ export default function PendingProducts() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/admin/pending-products");
+      const res = await fetch("http://localhost:5000/api/admin/pending-products");
       const data = res.ok ? await res.json() : [];
       setProducts(Array.isArray(data) ? data : []);
     } catch {
@@ -43,7 +43,7 @@ export default function PendingProducts() {
   const handleAction = async (productId, action) => {
     setProcessingId(productId);
     try {
-      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/admin/products/${productId}/status`, {
+      const res = await fetch(`http://localhost:5000/api/admin/products/${productId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: action }),
@@ -198,7 +198,7 @@ export default function PendingProducts() {
                         <div className="w-14 h-14 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden">
                           {product.image ? (
                             <img
-                              src={`https://khareedlo-backend-production.up.railway.app/${product.image}`}
+                              src={`http://localhost:5000/${product.image}`}
                               alt={product.product_name}
                               className="w-full h-full object-cover"
                             />
@@ -302,7 +302,7 @@ export default function PendingProducts() {
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
             {previewProduct.image ? (
               <img
-                src={`https://khareedlo-backend-production.up.railway.app/${previewProduct.image}`}
+                src={`http://localhost:5000/${previewProduct.image}`}
                 alt={previewProduct.product_name}
                 className="w-full h-64 object-cover"
               />

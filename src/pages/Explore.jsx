@@ -57,7 +57,6 @@ function FlyTo({ center, zoom }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (center) map.flyTo([center.lat, center.lng], zoom || 13, { duration: 1.4, easeLinearity: 0.35 });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center]);
   return null;
 }

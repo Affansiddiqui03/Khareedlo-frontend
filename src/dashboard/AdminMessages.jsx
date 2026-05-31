@@ -4,10 +4,10 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import {
-  Mail, Clock, User, Phone,
+  Mail, MailOpen, Clock, User, Phone, Tag,
   Building2, MessageSquare, Send, CheckCircle,
-  RefreshCw, Search, X,
-  AlertCircle, Inbox,
+  RefreshCw, Search, Filter, X, ExternalLink,
+  AlertCircle, ChevronDown, Inbox,
 } from "lucide-react";
 
 const TOPIC_LABELS = {
@@ -68,7 +68,7 @@ export default function AdminMessages() {
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/contact");
+      const res = await fetch("http://localhost:5000/api/contact");
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : []);
     } catch {
@@ -88,7 +88,7 @@ export default function AdminMessages() {
 
     if (!msg.is_read) {
       try {
-        await fetch(`https://khareedlo-backend-production.up.railway.app/api/contact/${msg.id}/read`, {
+        await fetch(`http://localhost:5000/api/contact/${msg.id}/read`, {
           method: "PATCH",
         });
         setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, is_read: 1 } : m));
@@ -103,7 +103,7 @@ export default function AdminMessages() {
     setReplyStatus(null);
 
     try {
-      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/contact/${selected.id}/reply`, {
+      const res = await fetch(`http://localhost:5000/api/contact/${selected.id}/reply`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reply_text: replyText.trim() }),

@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import {
-  Store, Users, Box, ShieldCheck, CheckCircle,
+  Store, Users, Box, ShieldCheck, TrendingUp, CheckCircle,
   XCircle, Clock, Globe, Phone, Mail, ArrowUpRight,
   AlertTriangle, RefreshCw, Package
 } from "lucide-react";
@@ -45,11 +45,11 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const [brandsRes, usersRes, productsRes, pendingBrandsRes, pendingProdsRes] = await Promise.all([
-        fetch("https://khareedlo-backend-production.up.railway.app/api/admin/brands"),
-        fetch("https://khareedlo-backend-production.up.railway.app/api/admin/users"),
-        fetch("https://khareedlo-backend-production.up.railway.app/api/admin/products"),
-        fetch("https://khareedlo-backend-production.up.railway.app/api/admin/brands/pending"),
-        fetch("https://khareedlo-backend-production.up.railway.app/api/admin/products/pending"),
+        fetch("http://localhost:5000/api/admin/brands"),
+        fetch("http://localhost:5000/api/admin/users"),
+        fetch("http://localhost:5000/api/admin/products"),
+        fetch("http://localhost:5000/api/admin/brands/pending"),
+        fetch("http://localhost:5000/api/admin/products/pending"),
       ]);
 
       const [brands, users, products, pb, pp] = await Promise.all([
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
   const handleBrandAction = async (id, action) => {
     setProcessing(id + action);
     try {
-      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/admin/brands/${id}`, {
+      const res = await fetch(`http://localhost:5000/api/admin/brands/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
                     {/* Logo / Initial */}
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
                       {b.logo ? (
-                        <img src={`https://khareedlo-backend-production.up.railway.app/${b.logo}`} alt={b.brand_name} className="w-full h-full object-cover" />
+                        <img src={`http://localhost:5000/${b.logo}`} alt={b.brand_name} className="w-full h-full object-cover" />
                       ) : (
                         b.brand_name?.[0]?.toUpperCase() || "B"
                       )}
