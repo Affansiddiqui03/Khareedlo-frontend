@@ -2,7 +2,7 @@
 // Professional one-time rating popup for products and brands
 
 import React, { useState } from "react";
-import { Star, CheckCircle } from "lucide-react";
+import { X, Star, CheckCircle } from "lucide-react";
 
 export default function RatingPopup({ type, id, name, onClose, onSubmit }) {
   const [hovered, setHovered]   = useState(0);
