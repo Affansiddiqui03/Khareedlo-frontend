@@ -6,7 +6,7 @@ import AdminLayout from "./AdminLayout";
 import {
   RefreshCw, CheckCircle, XCircle, Clock,
   Package, AlertTriangle, Zap, Database,
-  ArrowDownCircle, ChevronRight,
+  ArrowDownCircle,
 } from "lucide-react";
 
 const BRANDS = [

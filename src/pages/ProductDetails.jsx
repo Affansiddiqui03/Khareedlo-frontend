@@ -104,13 +104,13 @@ export default function ProductDetail() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, id]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!user?.id || !product) return;
     fetch(`${IMG_BASE}/api/user/track/product-click`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customer_id: user.id, product_id: product.id, product_name: product.title || product.product_name || "", brand_name: product.brand || "", brand_id: product.brand_id || null, image: product.image || null, price: product.price || null }),
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, product?.id]);
 
   useEffect(() => {

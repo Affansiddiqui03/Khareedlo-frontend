@@ -4,10 +4,10 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import {
-  Mail, MailOpen, Clock, User, Phone, Tag,
+  Mail, Clock, User, Phone,
   Building2, MessageSquare, Send, CheckCircle,
-  RefreshCw, Search, Filter, X, ExternalLink,
-  AlertCircle, ChevronDown, Inbox,
+  RefreshCw, Search, X,
+  AlertCircle, Inbox,
 } from "lucide-react";
 
 const TOPIC_LABELS = {

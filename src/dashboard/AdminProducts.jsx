@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import AdminLayout from "./AdminLayout";
 import {
-  Box, Search, Trash2, Filter, RefreshCw,
+  Search, Trash2, Filter, RefreshCw,
   CheckCircle, XCircle, ImageIcon, Package, AlertTriangle
 } from "lucide-react";
 

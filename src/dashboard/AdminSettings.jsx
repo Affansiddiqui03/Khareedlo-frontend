@@ -1,11 +1,11 @@
 // src/dashboard/AdminSettings.jsx
 // Admin platform settings — email config status, platform info, about
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AdminLayout from "./AdminLayout";
 import {
   Settings, Mail, CheckCircle, AlertCircle,
-  Info, Shield, Globe, Code, RefreshCw,
+  Info, Shield, RefreshCw,
 } from "lucide-react";
 
 function SettingRow({ icon: Icon, label, children, description }) {
