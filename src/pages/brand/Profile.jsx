@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import {
-  User, Mail, Phone, Globe, MapPin, FileText,
-  Save, CheckCircle, XCircle, Camera, Building2
+  Mail, Phone, Globe, MapPin, FileText,
+  Save, CheckCircle, XCircle, Building2
 } from "lucide-react";
 
 export default function Profile() {

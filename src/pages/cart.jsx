@@ -9,7 +9,7 @@ import BuyNowModal from "../components/BuyNowModal";
 import { useBuyNowModal } from "../hooks/useBuyNowModal";
 import {
   ShoppingCart, Trash2, ExternalLink, ArrowLeft,
-  Package, Store, ShoppingBag, Info, Sparkles, Lock,
+  Package, Store, ShoppingBag, Info, Sparkles,
 } from "lucide-react";
 
 const IMG_BASE = "http://localhost:5000";

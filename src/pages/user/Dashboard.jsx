@@ -8,7 +8,7 @@ import UserLayout from "../../components/UserLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   Store, MousePointerClick, ExternalLink, Package,
-  TrendingUp, RefreshCw, ShoppingBag, ChevronRight,
+  TrendingUp, RefreshCw, ShoppingBag,
   ArrowUpRight, MessageSquare,
 } from "lucide-react";
 import {

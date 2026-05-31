@@ -8,7 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import UserLayout from "../../components/UserLayout";
 import {
   MessageSquare, Clock, CheckCircle, ChevronRight,
-  User, Headphones, Tag, RefreshCw, Plus, AlertCircle,
+  User, Headphones, RefreshCw, Plus, AlertCircle,
 } from "lucide-react";
 
 const TOPIC_LABELS = {

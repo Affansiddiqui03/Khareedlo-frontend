@@ -8,8 +8,8 @@ import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import {
   Plus, Trash2, Eye, X, Upload, CheckCircle,
-  AlertCircle, Clock, Package, ImageIcon, Tag,
-  Globe, ChevronDown, Loader2,
+  AlertCircle, Clock, Package, ImageIcon,
+  Globe, Loader2,
 } from "lucide-react";
 
 const IMG_BASE = "http://localhost:5000";
