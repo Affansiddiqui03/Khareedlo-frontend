@@ -43,7 +43,7 @@ export default function BuyNowModal({ product, onClose, onOrderSaved }) {
   const handleSubmit = async () => {
     setSaving(true);
     try {
-      const res = await fetch("http://localhost:5000/api/orders", {
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/orders", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -113,7 +113,7 @@ export default function BuyNowModal({ product, onClose, onOrderSaved }) {
               style={{ background: theme.bg }}>
               {(product.image && product.image !== "photos/") ? (
                 <img
-                  src={product.image?.startsWith("http") ? product.image : `http://localhost:5000/${product.image}`}
+                  src={product.image?.startsWith("http") ? product.image : `https://khareedlo-backend-production.up.railway.app/${product.image}`}
                   alt={product.title || product.product_name}
                   className="w-16 h-20 object-cover rounded-xl flex-shrink-0 shadow-sm"
                   onError={e => { e.currentTarget.style.display = "none"; }}

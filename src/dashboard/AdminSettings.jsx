@@ -37,7 +37,7 @@ export default function AdminSettings() {
   const testEmail = async () => {
     setTestLoading(true);
     try {
-      const res  = await fetch("http://localhost:5000/api/contact/unread-count");
+      const res  = await fetch("https://khareedlo-backend-production.up.railway.app/api/contact/unread-count");
       if (res.ok) {
         setEmailStatus("ok");
         showToast("Backend connection is working. Email depends on EMAIL_PASS in .env");

@@ -24,7 +24,7 @@ export default function AdminProducts() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/admin/products");
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/admin/products");
       const data = res.ok ? await res.json() : [];
       // Only show APPROVED ones on this page (pending go to approvals)
       const approved = (Array.isArray(data) ? data : []).filter(p => p.status === "APPROVED");
@@ -57,7 +57,7 @@ export default function AdminProducts() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/products/${deleteTarget.product_id}`, { method: "DELETE" });
+      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/admin/products/${deleteTarget.product_id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setProducts(prev => prev.filter(p => p.product_id !== deleteTarget.product_id));
       showToast(`"${deleteTarget.product_name}" deleted successfully.`);
@@ -158,7 +158,7 @@ export default function AdminProducts() {
                           <div className="w-14 h-14 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden">
                             {p.image && p.image !== "photos/" ? (
                               <img
-                                src={`http://localhost:5000/${p.image}`}
+                                src={`https://khareedlo-backend-production.up.railway.app/${p.image}`}
                                 alt={p.product_name}
                                 className="w-full h-full object-cover"
                                 onError={e => { e.target.style.display = "none"; }}

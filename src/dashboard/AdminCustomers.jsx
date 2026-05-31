@@ -40,7 +40,7 @@ export default function AdminCustomers() {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/admin/users");
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/admin/users");
       const data = res.ok ? await res.json() : [];
       setCustomers(Array.isArray(data) ? data : []);
     } catch {
