@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import {
-  Store, Users, Box, ShieldCheck, TrendingUp, CheckCircle,
+  Store, Users, Box, ShieldCheck, CheckCircle,
   XCircle, Clock, Globe, Phone, Mail, ArrowUpRight,
   AlertTriangle, RefreshCw, Package
 } from "lucide-react";

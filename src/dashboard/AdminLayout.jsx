@@ -5,8 +5,8 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, Navigate } from "react-router-dom";
 import {
   LayoutDashboard, Store, Box, Users, ShieldCheck,
-  LogOut, Bell, Menu, X, MessageSquare,
-  RefreshCw, Settings, Database,
+  LogOut, Bell, Menu, MessageSquare,
+  Settings, Database,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 

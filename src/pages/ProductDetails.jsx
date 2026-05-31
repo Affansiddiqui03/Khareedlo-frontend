@@ -85,6 +85,7 @@ export default function ProductDetail() {
 
   const compareProduct = comparePool.find(p => String(p.id || p.product_id) === String(compareId));
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setLoading(true);
     fetch(`${IMG_BASE}/api/products/${id}`).then(r => r.json()).then(d => { setProduct(d); setLoading(false); }).catch(() => setLoading(false));
