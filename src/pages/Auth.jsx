@@ -259,44 +259,48 @@ export default function Auth() {
   };
 
 
-
-
-
   return (
-    <div className="min-h-screen flex justify-center items-start sm:items-center bg-gradient-to-br from-orange-600 via-slate-400 to-red-500 py-8 px-4">
-      <div className="relative bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-3xl p-5 sm:p-6 w-full max-w-md overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-orange-600 via-slate-400 to-red-500 animate-gradient bg-[length:400%_400%] p-4">
+      <button
+        onClick={ handleAdminLogin }
+        className="absolute top-20 right-4 px-3 py-5 mr-3 rounded-full text-sm font-bold bg-white/20 text-white hover:bg-black/60"
+      >
+        Admin
+      </button>
+      <div className="relative bg-white/10 backdrop-blur-3xl border border-white/20  shadow-2xl rounded-3xl p-6 w-full max-w-2xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
 
-        {/* Row 1: Login / Register tabs */}
-        <div className="flex gap-2 bg-white/10 p-1 rounded-2xl mb-2">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${isLogin ? "bg-white/30 text-white shadow" : "text-white/60 hover:text-white"}`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${!isLogin ? "bg-white/30 text-white shadow" : "text-white/60 hover:text-white"}`}
-          >
-            Register
-          </button>
-        </div>
+        {/* Top toggles — single row, responsive */}
+        <div className="flex items-center justify-between mb-4 gap-2">
+          <div className="flex gap-1">
+            <button
+              onClick={ () => setIsLogin(true) }
+              className={ `px-2 sm:px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${isLogin ? "bg-white/25 text-white" : "text-white/80"}` }
+            >
+              Login
+            </button>
+            <button
+              onClick={ () => setIsLogin(false) }
+              className={ `px-2 sm:px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${!isLogin ? "bg-white/25 text-white" : "text-white/80"}` }
+            >
+              Register
+            </button>
+          </div>
 
-        {/* Row 2: Customer / Brand tabs */}
-        <div className="flex gap-2 bg-white/10 p-1 rounded-2xl mb-5">
-          <button
-            onClick={() => switchMode("customer")}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${mode === "customer" ? "bg-white/30 text-white shadow" : "text-white/60 hover:text-white"}`}
-          >
-            Customer
-          </button>
-          <button
-            onClick={() => switchMode("brand")}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${mode === "brand" ? "bg-white/30 text-white shadow" : "text-white/60 hover:text-white"}`}
-          >
-            Brand
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={ () => switchMode("customer") }
+              className={ `px-2 sm:px-3 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${mode === "customer" ? "bg-white/25 text-white" : "text-white/80"}` }
+            >
+              Customer
+            </button>
+            <button
+              onClick={ () => switchMode("brand") }
+              className={ `px-2 sm:px-3 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${mode === "brand" ? "bg-white/25 text-white" : "text-white/80"}` }
+            >
+              Brand
+            </button>
+          </div>
         </div>
 
         {/* Title & description */ }
@@ -429,21 +433,22 @@ export default function Auth() {
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/70 placeholder:font-semibold"
                 />
 
-                {/* Logo */}
-                <div className="space-y-1.5">
-                  <label className="text-sm text-white/80 font-medium block">Brand Logo</label>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <input
-                      onChange={handleLogoChange}
-                      type="file"
-                      accept="image/*"
-                      className="text-sm text-white/70 flex-1 min-w-0"
+                {/* Logo */ }
+                <div className="flex items-center space-x-3">
+                  <label className="text-sm text-white/80 font-medium">Brand Logo</label>
+                  <input
+                    onChange={ handleLogoChange }
+                    type="file"
+                    accept="image/*"
+                    className="text-sm text-white/70"
+                  />
+                  { brandLogoPreview && (
+                    <img
+                      src={ brandLogoPreview }
+                      alt="logo preview"
+                      className="h-12 w-12 rounded-md object-cover border"
                     />
-                    {brandLogoPreview && (
-                      <img src={brandLogoPreview} alt="logo preview"
-                        className="h-10 w-10 rounded-lg object-cover border border-white/30 flex-shrink-0" />
-                    )}
-                  </div>
+                  ) }
                 </div>
 
                 {/* Other Info */ }
@@ -470,17 +475,7 @@ export default function Auth() {
               </>
             ) }
           </form>
-        )}
-
-        {/* Admin login — always at bottom, never overlaps form */}
-        <div className="mt-5 pt-4 border-t border-white/10 text-center">
-          <button
-            onClick={handleAdminLogin}
-            className="text-xs text-white/30 hover:text-white/60 transition-colors font-medium"
-          >
-            Admin Login
-          </button>
-        </div>
+        ) }
       </div>
     </div>
   );
