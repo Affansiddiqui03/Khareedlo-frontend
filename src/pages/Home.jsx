@@ -60,7 +60,7 @@ export default function Home() {
   useEffect(() => {
     async function loadTrending() {
       try {
-        const res = await fetch("http://localhost:5000/api/trending");
+        const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/trending");
 
         if (!res.ok) throw new Error("API failed");
 
@@ -77,7 +77,7 @@ export default function Home() {
 
   // ── Popular Brands ─────────────────────────────────────────
   useEffect(() => {
-    fetch("http://localhost:5000/api/home/popular-brands")
+    fetch("https://khareedlo-backend-production.up.railway.app/api/home/popular-brands")
       .then((r) => r.json())
       .then((d) => setPopularBrands(Array.isArray(d) ? d : []))
       .catch(() => setPopularBrands([]));

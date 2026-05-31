@@ -16,7 +16,7 @@ import {
   MousePointerClick, ExternalLink, Package, TrendingUp, Star,
 } from "lucide-react";
 
-const IMG_BASE = "http://localhost:5000";
+const IMG_BASE = "https://khareedlo-backend-production.up.railway.app";
 
 // ── Custom tooltip ─────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
@@ -43,8 +43,8 @@ function BrandRatingWidget({ brandId, theme }) {
   useEffect(() => {
     if (!brandId) return;
     Promise.all([
-      fetch(`http://localhost:5000/api/ratings/brand/${brandId}/stats`).then(r => r.json()),
-      fetch(`http://localhost:5000/api/ratings/brand/${brandId}/products`).then(r => r.json()),
+      fetch(`https://khareedlo-backend-production.up.railway.app/api/ratings/brand/${brandId}/stats`).then(r => r.json()),
+      fetch(`https://khareedlo-backend-production.up.railway.app/api/ratings/brand/${brandId}/products`).then(r => r.json()),
     ])
       .then(([s, p]) => { setStats(s); setProducts(Array.isArray(p) ? p : []); })
       .catch(() => {})
@@ -180,7 +180,7 @@ export default function Analytics() {
         setError("");
 
         // Use brand dashboard route (has correct keys + all 7 days)
-        const res = await fetch(`http://localhost:5000/api/brand/pos/summary/${brandId}`);
+        const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/brand/pos/summary/${brandId}`);
         if (!res.ok) throw new Error("API failed");
         const data = await res.json();
 

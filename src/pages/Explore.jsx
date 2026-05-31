@@ -10,10 +10,10 @@ import {
 import L from "leaflet";
 import outlets from "../data/outlets";
 import { haversineKm, fmtKm } from "../utils/geo";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   MapPin, LocateFixed, Store, Clock,
-  Phone, X, Search, Navigation,
+  X, Search, Navigation,
 } from "lucide-react";
 import Footer from "../components/Footer";
 import "leaflet/dist/leaflet.css";
@@ -54,6 +54,7 @@ const userIcon = L.divIcon({
 
 function FlyTo({ center, zoom }) {
   const map = useMap();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (center) map.flyTo([center.lat, center.lng], zoom || 13, { duration: 1.4, easeLinearity: 0.35 });
   }, [center]);
@@ -66,7 +67,6 @@ function MapClickHandler({ enabled, onPick }) {
 }
 
 export default function Explore() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [userLoc,    setUserLoc]    = useState(null);

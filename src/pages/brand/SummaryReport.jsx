@@ -43,8 +43,8 @@ export default function SummaryReport() {
       setLoading(true);
       try {
         const [sumRes, posRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/brand/overview/${brandId}`),
-          fetch(`http://localhost:5000/api/brand/pos/summary/${brandId}`),
+          fetch(`https://khareedlo-backend-production.up.railway.app/api/brand/overview/${brandId}`),
+          fetch(`https://khareedlo-backend-production.up.railway.app/api/brand/pos/summary/${brandId}`),
         ]);
 
         const sumData = sumRes.ok ? await sumRes.json() : {};

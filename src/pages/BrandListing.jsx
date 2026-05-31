@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import BrandCard from "../components/BrandCard";
 import Footer from "../components/Footer";
-import { Search } from "lucide-react";
 
 export default function BrandListing() {
   const [brands, setBrands] = useState([]);
@@ -12,7 +11,7 @@ export default function BrandListing() {
   const [sortBy, setSortBy] = useState("name");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/brands")
+    fetch("https://khareedlo-backend-production.up.railway.app/api/brands")
       .then(res => res.json())
       .then(data => setBrands(Array.isArray(data) ? data : []))
       .catch(() => {});

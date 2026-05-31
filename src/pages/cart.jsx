@@ -12,7 +12,7 @@ import {
   Package, Store, ShoppingBag, Info, Sparkles,
 } from "lucide-react";
 
-const IMG_BASE = "http://localhost:5000";
+const IMG_BASE = "https://khareedlo-backend-production.up.railway.app";
 
 function imgSrc(image) {
   if (!image || image === "photos/" || image.trim() === "") return null;
@@ -107,11 +107,11 @@ export default function Cart() {
 
   const handleBuy = (item) => {
     if (user?.id) {
-      fetch("http://localhost:5000/api/user/track/buy-redirect", {
+      fetch("https://khareedlo-backend-production.up.railway.app/api/user/track/buy-redirect", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customer_id: user.id, product_id: item.product_id, product_name: item.name, brand_name: item.brand }),
       }).catch(() => {});
-      fetch("http://localhost:5000/api/pos/track", {
+      fetch("https://khareedlo-backend-production.up.railway.app/api/pos/track", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand_id: item.brand_id, product_id: item.product_id, action: "BUY_NOW" }),
       }).catch(() => {});

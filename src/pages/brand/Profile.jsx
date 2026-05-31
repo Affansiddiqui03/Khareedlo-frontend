@@ -25,7 +25,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!brandId) return;
-    fetch(`http://localhost:5000/api/brand-profile/${brandId}`)
+    fetch(`https://khareedlo-backend-production.up.railway.app/api/brand-profile/${brandId}`)
       .then(r => r.json())
       .then(data => { setForm({ name: data.name || "", email: data.email || "", contact: data.contact || "", website: data.website || "", city: data.city || "", description: data.description || "" }); })
       .catch(() => {})
@@ -35,7 +35,7 @@ export default function Profile() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/brand-profile/${brandId}`, {
+      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/brand-profile/${brandId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

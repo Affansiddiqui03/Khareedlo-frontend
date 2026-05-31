@@ -2,7 +2,7 @@
 // FIXED: Removed "Quick Help" section from sidebar
 // All other logic unchanged
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Footer from "../components/Footer";
@@ -73,7 +73,7 @@ export default function Contact() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("http://localhost:5000/api/contact", {
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/contact", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,6 +1,6 @@
 const handleLogin = async (e) => {
   e.preventDefault();
-  const res = await axios.post("http://localhost:5000/api/login", { email, password });
+  const res = await axios.post("https://khareedlo-backend-production.up.railway.app/api/login", { email, password });
 
   // ✅ Save token + user info in localStorage
   localStorage.setItem("token", res.data.token);

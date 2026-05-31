@@ -5,7 +5,7 @@
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
-const BASE = "http://localhost:5000/api/user";
+const BASE = "https://khareedlo-backend-production.up.railway.app/api/user";
 
 // ── Track brand visit when component mounts ────────────────────
 export function useBrandVisitTracker(brandId, brandName) {
@@ -23,6 +23,7 @@ export function useBrandVisitTracker(brandId, brandName) {
         brand_name:  brandName || "",
       }),
     }).catch(() => {}); // silent — tracking should never break the UI
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, brandId]);
 }
 

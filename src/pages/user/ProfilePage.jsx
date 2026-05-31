@@ -37,7 +37,7 @@ export default function ProfilePage() {
     if (!message.trim()) return showToast("Please write your message first", "error");
     setSending(true);
     try {
-      const res = await fetch("http://localhost:5000/api/user/feedback", {
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/user/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customer_id: user?.id, name: user?.name, email: user?.email, message: message.trim() }),

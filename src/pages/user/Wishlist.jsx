@@ -55,7 +55,7 @@ export default function Wishlist() {
                   <div className="h-48 bg-gray-50 overflow-hidden relative">
                     {item.image && item.image !== "photos/" ? (
                       <img
-                        src={item.image.startsWith("http") ? item.image : `http://localhost:5000/${item.image}`}
+                        src={item.image.startsWith("http") ? item.image : `https://khareedlo-backend-production.up.railway.app/${item.image}`}
                         alt={item.product_name || item.title || item.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                         onError={e => e.target.style.display = "none"}

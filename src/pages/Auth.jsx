@@ -82,7 +82,7 @@ export default function Auth() {
           return;
         }
 
-        const res = await fetch("http://localhost:5000/api/auth/login", {
+        const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: custEmail, password: custPassword }),
@@ -113,7 +113,7 @@ export default function Auth() {
         if (custPassword !== custConfirm)
           return setMsg("Passwords do not match");
 
-        const res = await fetch("http://localhost:5000/api/auth/register", {
+        const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: custName, email: custEmail, password: custPassword }),
@@ -147,7 +147,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -200,7 +200,7 @@ export default function Auth() {
       formData.append("website", brandWebsite);
       formData.append("logo", brandLogoFile); // ✅ LOGO
 
-      const res = await fetch("http://localhost:5000/api/brand/register", {
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/brand/register", {
         method: "POST",
         body: formData,
       });
@@ -231,7 +231,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

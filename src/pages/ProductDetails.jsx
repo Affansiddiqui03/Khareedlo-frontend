@@ -14,7 +14,7 @@ import {
   Shield, RotateCcw, BadgeCheck, X, Lock, TrendingUp,
 } from "lucide-react";
 
-const IMG_BASE = "http://localhost:5000";
+const IMG_BASE = "https://khareedlo-backend-production.up.railway.app";
 
 function resolveImg(img) {
   if (!img || img === "photos/" || img.trim() === "") return null;
@@ -101,8 +101,10 @@ export default function ProductDetail() {
         return (p.category || p.gender || "").toLowerCase() === gender.toLowerCase();
       }));
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, id]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!user?.id || !product) return;
     fetch(`${IMG_BASE}/api/user/track/product-click`, {

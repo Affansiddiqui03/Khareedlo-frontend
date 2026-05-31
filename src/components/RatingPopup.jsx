@@ -2,7 +2,7 @@
 // Professional one-time rating popup for products and brands
 
 import React, { useState } from "react";
-import { Star, X, CheckCircle } from "lucide-react";
+import { Star, CheckCircle } from "lucide-react";
 
 export default function RatingPopup({ type, id, name, onClose, onSubmit }) {
   const [hovered, setHovered]   = useState(0);
@@ -17,8 +17,8 @@ export default function RatingPopup({ type, id, name, onClose, onSubmit }) {
     setSubmitting(true);
     try {
       const endpoint = type === "brand"
-        ? "http://localhost:5000/api/ratings/brand"
-        : "http://localhost:5000/api/ratings/product";
+        ? "https://khareedlo-backend-production.up.railway.app/api/ratings/brand"
+        : "https://khareedlo-backend-production.up.railway.app/api/ratings/product";
 
       const body = type === "brand"
         ? { brand_id: id, rating: selected }

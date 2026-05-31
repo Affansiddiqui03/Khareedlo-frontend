@@ -74,8 +74,8 @@ export default function BrandDetails() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`http://localhost:5000/api/brands/${brandId}`).then(r => r.json()),
-      fetch(`http://localhost:5000/api/products/brand/${brandId}/seo`).then(r => r.json()),
+      fetch(`https://khareedlo-backend-production.up.railway.app/api/brands/${brandId}`).then(r => r.json()),
+      fetch(`https://khareedlo-backend-production.up.railway.app/api/products/brand/${brandId}/seo`).then(r => r.json()),
     ])
       .then(([brandData, productData]) => {
         setBrand(brandData);
@@ -87,7 +87,7 @@ export default function BrandDetails() {
 
   // ── Fetch categories ──────────────────────────────────────
   useEffect(() => {
-    fetch(`http://localhost:5000/api/products/brand/${brandId}/categories`)
+    fetch(`https://khareedlo-backend-production.up.railway.app/api/products/brand/${brandId}/categories`)
       .then(r => r.json())
       .then(setCategories)
       .catch(() => {});
@@ -96,7 +96,7 @@ export default function BrandDetails() {
   // ── Fetch sub-categories ──────────────────────────────────
   useEffect(() => {
     if (!activeCategory) return;
-    fetch(`http://localhost:5000/api/products/brand/${brandId}/subcategories/${activeCategory}`)
+    fetch(`https://khareedlo-backend-production.up.railway.app/api/products/brand/${brandId}/subcategories/${activeCategory}`)
       .then(r => r.json())
       .then(setSubCategories)
       .catch(() => {});
@@ -108,8 +108,8 @@ export default function BrandDetails() {
   useEffect(() => {
     if (!brandId) return;
     const url = user?.id
-      ? `http://localhost:5000/api/ratings/brand/${brandId}?customer_id=${user.id}`
-      : `http://localhost:5000/api/ratings/brand/${brandId}`;
+      ? `https://khareedlo-backend-production.up.railway.app/api/ratings/brand/${brandId}?customer_id=${user.id}`
+      : `https://khareedlo-backend-production.up.railway.app/api/ratings/brand/${brandId}`;
     fetch(url).then(r => r.json()).then(data => {
       if (data.avg_rating > 0) setAvgRating(data.avg_rating);
       setRatingCount(data.rating_count || 0);
@@ -362,7 +362,7 @@ export default function BrandDetails() {
                   disableAdd={!user}
                   onAddToCart={() => {
                     if (!user) { navigate("/auth"); return; }
-                    fetch("http://localhost:5000/api/pos/track", {
+                    fetch("https://khareedlo-backend-production.up.railway.app/api/pos/track", {
                       method: "POST", headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ brand_id: brandId, product_id: p.id, action: "ADD_TO_CART" }),
                     }).catch(() => {});
