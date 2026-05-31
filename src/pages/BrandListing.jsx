@@ -54,9 +54,9 @@ export default function BrandListing() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex justify-center my-2 px-6">
-        <div className="flex items-center w-full max-w-lg bg-gradient-to-r from-white/90 to-white/70
-                        backdrop-blur-xl border border-white/30 rounded-full shadow-lg p-2 gap-2">
+      <div className="flex justify-center my-4 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full max-w-lg bg-gradient-to-r from-white/90 to-white/70
+                        backdrop-blur-xl border border-white/30 rounded-2xl sm:rounded-full shadow-lg p-2 gap-2">
 
           <div className="relative flex-1">
             <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"
@@ -68,7 +68,7 @@ export default function BrandListing() {
               value={q}
               onChange={e => setQ(e.target.value)}
               placeholder="Search brands..."
-              className="w-full pl-12 pr-4 py-2 rounded-full border border-gray-200
+              className="w-full pl-12 pr-4 py-2.5 rounded-full border border-gray-200
                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                          outline-none text-sm bg-white/70 placeholder-gray-400"
             />
@@ -77,8 +77,8 @@ export default function BrandListing() {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="px-4 py-2 rounded-full border border-gray-200 bg-white/80
-                       text-sm cursor-pointer focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2.5 rounded-full border border-gray-200 bg-white/80
+                       text-sm cursor-pointer focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
           >
             <option value="name">A–Z</option>
             <option value="popular">Popular (Top Rated)</option>

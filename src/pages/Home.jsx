@@ -9,6 +9,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useAuth } from "../contexts/AuthContext";
 import { CartContext } from "../contexts/CartContext";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import BrandCard from "../components/BrandCard";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
@@ -104,7 +105,7 @@ export default function Home() {
         />
 
         {/* ═════════ HERO CAROUSEL ═════════ */}
-        <section className="relative max-w-[128%] mx-auto px-4 overflow-hidden mt-3">
+        <section className="w-full px-2 sm:px-4 overflow-hidden mt-3">
           <Carousel
             autoPlay
             infiniteLoop
@@ -114,9 +115,9 @@ export default function Home() {
               hasPrev && (
                 <button
                   onClick={onClickHandler}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black p-3 rounded-full shadow-lg transition"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95"
                 >
-                  ‹
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               )
             }
@@ -124,9 +125,9 @@ export default function Home() {
               hasNext && (
                 <button
                   onClick={onClickHandler}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black p-3 rounded-full shadow-lg transition"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95"
                 >
-                  ›
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               )
             }
@@ -134,38 +135,33 @@ export default function Home() {
             {[banner1, banner2, banner3, banner4].map((img, i) => (
               <div
                 key={i}
-                className="relative w-full h-[50vh] sm:h-[60vh] md:h-[75vh] rounded-3xl overflow-hidden shadow-2xl"
+                className="relative w-full h-[42vh] sm:h-[58vh] md:h-[75vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl"
               >
                 <img
                   src={img}
                   alt="KHAREEDLO Banner"
                   className="w-full h-full object-cover"
                 />
-
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <div className="text-center px-4">
-                    <h1 className="text-4xl md:text-6xl font-extrabold text-white">
+                <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+                  <div className="text-center px-4 sm:px-10 max-w-2xl">
+                    <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight">
                       Discover Premium
                       <br className="hidden sm:block" />
                       Fashion Brands
                     </h1>
-
-                    <p className="mt-4 text-white/80 max-w-xl mx-auto">
-                      Discover Pakistan's top brands, explore products &
-                      nearby outlets.
+                    <p className="mt-2 sm:mt-4 text-white/80 text-xs sm:text-base max-w-lg mx-auto">
+                      Discover Pakistan's top brands, explore products &amp; nearby outlets.
                     </p>
-
-                    <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                    <div className="mt-5 sm:mt-8 flex flex-row justify-center gap-2 sm:gap-4">
                       <Link
                         to="/products"
-                        className="px-8 py-3 rounded-full bg-gradient-to-r from-red-600 to-[#f2976a] text-white font-semibold hover:shadow-lg transition-shadow"
+                        className="px-5 sm:px-8 py-2 sm:py-3 rounded-full bg-gradient-to-r from-red-600 to-[#f2976a] text-white font-semibold hover:shadow-lg transition-shadow text-sm sm:text-base"
                       >
                         Shop Now
                       </Link>
-
                       <Link
                         to="/brands"
-                        className="px-8 py-3 rounded-full bg-white text-black font-semibold hover:shadow-lg transition-shadow"
+                        className="px-5 sm:px-8 py-2 sm:py-3 rounded-full bg-white text-black font-semibold hover:shadow-lg transition-shadow text-sm sm:text-base"
                       >
                         Explore Brands
                       </Link>
@@ -179,7 +175,7 @@ export default function Home() {
 
         {/* ═════════ POPULAR BRANDS ═════════ */}
         <section className="max-w-7xl mx-auto px-4 py-20">
-          <h2 className="text-5xl font-extrabold text-center mb-10">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-8 sm:mb-10">
             Popular Brands
           </h2>
 
@@ -200,8 +196,8 @@ export default function Home() {
         {/* ═════════ TRENDING PRODUCTS ═════════ */}
         <section className="bg-gradient-to-b from-[#fee3cd] to-[#ffbe9e] py-20">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-4xl font-extrabold">
+            <div className="flex justify-between items-center mb-8 sm:mb-10">
+              <h2 className="text-2xl sm:text-4xl font-extrabold">
                 Trending Products
               </h2>
 
@@ -263,10 +259,9 @@ export default function Home() {
                 {outlets.length} outlets across Pakistan
               </div>
 
-              <h2 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
                 Find Your Nearest
                 <br />
-
                 <span
                   className="bg-clip-text text-transparent"
                   style={{

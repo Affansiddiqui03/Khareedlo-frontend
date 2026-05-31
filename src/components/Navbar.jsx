@@ -240,71 +240,85 @@ export default function Navbar() {
           />
 
           {/* Drawer */}
-          <div className="relative w-72 h-full bg-[#0C0420]/80 backdrop-blur-xl border-3 border-white/10 shadow-2xl p-6 text-white">
-            
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-lg font-semibold"></span>
+          <div className="relative w-72 h-full flex flex-col bg-[#0C0420] backdrop-blur-xl shadow-2xl text-white">
 
-              <button onClick={() => setMobileOpen(false)}>
-                <X className="w-6 h-6" />
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-black text-xs">K</span>
+                </div>
+                <span className="text-white font-bold text-base tracking-tight">Khareedlo</span>
+              </div>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <nav className="flex flex-col gap-4">
-              
-              {/* Mobile Cart */}
-              <Link
-                to="/cart"
-                onClick={() => setMobileOpen(false)}
-                className="text-lg text-center font-medium text-black bg-red-50 cursor-pointer hover:bg-red-300 rounded-xl py-1 relative"
-              >
-                Cart
+            {/* User greeting */}
+            {user && (
+              <div className="mx-4 mt-4 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-orange-400 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                  {user.name?.[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-semibold truncate">{user.name}</p>
+                  <p className="text-white/40 text-xs truncate">{user.email}</p>
+                </div>
+              </div>
+            )}
 
-                {user && totalItems > 0 && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-
-              {/* Nav Links */}
+            {/* Nav Links */}
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
               {links.map((l) => (
                 <NavLink
                   key={l.label}
                   to={l.to}
+                  end={l.to === "/"}
                   onClick={() => setMobileOpen(false)}
-                  className="text-lg text-center font-medium text-black bg-red-50 cursor-pointer hover:bg-red-300 rounded-xl"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                      isActive
+                        ? "bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg"
+                        : "text-white/60 hover:text-white hover:bg-white/8"
+                    }`
+                  }
                 >
                   {l.label}
                 </NavLink>
               ))}
 
-              {/* Auth */}
-              {!user ? (
-                <Link
-                  to="/auth"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-4 bg-gradient-to-r from-red-600 to-orange-500 text-white text-center py-3 rounded-xl font-semibold"
-                >
-                  Login / Sign Up
-                </Link>
-              ) : (
-                <div className="mt-6 flex flex-col gap-4">
-                  
+              {/* Divider */}
+              <div className="my-3 border-t border-white/10" />
+
+              {/* Auth links */}
+              {user ? (
+                <>
                   <Link
-                    to="/dashboard"
-                    className="hover:text-amber-400"
+                    to={user.role === "admin" ? "/admin" : user.role === "brand" ? "/brand" : "/dashboard"}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/8 transition-all"
                   >
                     Dashboard
                   </Link>
-
                   <button
-                    onClick={handleLogout}
-                    className="text-red-400 hover:text-red-300 text-left"
+                    onClick={() => { handleLogout(); setMobileOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
                   >
                     Logout
                   </button>
-                </div>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-red-600 to-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all"
+                >
+                  Login / Sign Up
+                </Link>
               )}
             </nav>
           </div>

@@ -257,53 +257,89 @@ export default function ProductDetail() {
 
       {/* Comparison Table */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-xl font-extrabold text-gray-900 mb-1">Compare with other {gender || ""} Products</h2>
-          <p className="text-xs text-gray-400 mb-5">Comparing across all brands in the same category</p>
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 mb-1">Compare with other {gender || ""} Products</h2>
+          <p className="text-xs text-gray-400 mb-4 sm:mb-5">Comparing across all brands in the same category</p>
           {comparePool.length === 0 ? (
             <p className="text-sm text-gray-400">No other {gender} products available to compare.</p>
           ) : (
             <>
               <select value={compareId} onChange={e => setCompareId(e.target.value)}
-                className="w-full sm:w-96 px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 mb-7 cursor-pointer">
-                <option value="">— Select a {gender} product to compare —</option>
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 mb-5 sm:mb-7 cursor-pointer">
+                <option value="">— Select a product to compare —</option>
                 {comparePool.map(p => <option key={p.id || p.product_id} value={p.id || p.product_id}>{p.title || p.product_name} — PKR {Number(p.price).toLocaleString()}</option>)}
               </select>
               {compareProduct && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm min-w-[520px]">
-                    <thead>
-                      <tr className="border-b border-gray-100">
-                        <th className="py-3 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest w-1/4">Feature</th>
-                        <th className="py-3 px-4 text-center text-xs font-bold text-red-500 uppercase tracking-widest">This Product</th>
-                        <th className="py-3 px-4 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">Compared</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b border-gray-50">
-                        <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Image</td>
-                        {[{ img: src, name: title }, { img: resolveImg(compareProduct.image), name: compareProduct.title || compareProduct.product_name }].map((x, i) => (
-                          <td key={i} className="py-4 px-4 text-center">
-                            {x.img ? <img src={x.img} className="h-28 w-20 object-cover rounded-2xl mx-auto shadow-sm" alt="" onError={e => e.currentTarget.style.display="none"} /> : <div className="h-28 w-20 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center"><Package className="w-6 h-6 text-gray-300" /></div>}
-                          </td>
-                        ))}
-                      </tr>
-                      <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Name</td><td className="py-4 px-4 text-center font-semibold text-gray-800 text-sm">{title}</td><td className="py-4 px-4 text-center font-semibold text-gray-800 text-sm">{compareProduct.title || compareProduct.product_name}</td></tr>
-                      <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Brand</td><td className="py-4 px-4 text-center text-gray-700">{product.brand || product.brand_name}</td><td className="py-4 px-4 text-center text-gray-700">{compareProduct.brand || compareProduct.brand_name}</td></tr>
-                      <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Price</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(product.price).toLocaleString()}</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(compareProduct.price).toLocaleString()}</td></tr>
-                      <tr className="border-b border-gray-50">
-                        <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</td>
-                        <td className="py-4 px-4"><div className="flex justify-center">{avgRating > 0 ? <StarRow rating={avgRating} count={ratingCount} /> : <span className="text-xs text-gray-400">No ratings yet</span>}</div></td>
-                        <td className="py-4 px-4"><div className="flex justify-center">{(Number(compareProduct.avg_rating)||0) > 0 ? <StarRow rating={compareProduct.avg_rating} count={compareProduct.rating_count||0} /> : <span className="text-xs text-gray-400">No ratings yet</span>}</div></td>
-                      </tr>
-                      <tr>
-                        <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Trending</td>
-                        <td className="py-4 px-4 text-center">{isTrend ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Yes</span> : <span className="text-xs text-gray-400">—</span>}</td>
-                        <td className="py-4 px-4 text-center">{Number(compareProduct.score)>15 ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Yes</span> : <span className="text-xs text-gray-400">—</span>}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <>
+                  {/* Mobile: card layout */}
+                  <div className="sm:hidden space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      {[{img: src, name: title, label: "This Product"}, {img: resolveImg(compareProduct.image), name: compareProduct.title || compareProduct.product_name, label: "Compared"}].map((x, i) => (
+                        <div key={i} className={`rounded-2xl p-3 text-center ${i === 0 ? "bg-red-50 border border-red-100" : "bg-gray-50 border border-gray-100"}`}>
+                          <p className={`text-[10px] font-black uppercase tracking-wider mb-2 ${i === 0 ? "text-red-500" : "text-gray-400"}`}>{x.label}</p>
+                          {x.img ? <img src={x.img} className="h-24 w-full object-cover rounded-xl mb-2" alt="" onError={e => e.currentTarget.style.display="none"} /> : <div className="h-24 bg-gray-100 rounded-xl mb-2 flex items-center justify-center"><Package className="w-6 h-6 text-gray-300" /></div>}
+                          <p className="text-xs font-bold text-gray-700 line-clamp-2">{x.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {[
+                      {label: "Brand", v1: product.brand || product.brand_name, v2: compareProduct.brand || compareProduct.brand_name},
+                      {label: "Price", v1: `PKR ${Number(product.price).toLocaleString()}`, v2: `PKR ${Number(compareProduct.price).toLocaleString()}`, bold: true},
+                      {label: "Trending", v1: isTrend ? "🔥 Yes" : "—", v2: Number(compareProduct.score) > 15 ? "🔥 Yes" : "—"},
+                    ].map(row => (
+                      <div key={row.label} className="bg-gray-50 rounded-2xl p-3">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{row.label}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className={`bg-red-50 rounded-xl p-2.5 text-center text-xs ${row.bold ? "font-black text-orange-600" : "font-semibold text-gray-700"}`}>{row.v1}</div>
+                          <div className={`bg-white rounded-xl p-2.5 text-center text-xs border border-gray-100 ${row.bold ? "font-black text-orange-600" : "font-semibold text-gray-700"}`}>{row.v2}</div>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="bg-gray-50 rounded-2xl p-3">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Rating</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-red-50 rounded-xl p-2.5 flex justify-center">{avgRating > 0 ? <StarRow rating={avgRating} count={ratingCount} /> : <span className="text-xs text-gray-400">No ratings</span>}</div>
+                        <div className="bg-white rounded-xl p-2.5 border border-gray-100 flex justify-center">{(Number(compareProduct.avg_rating)||0) > 0 ? <StarRow rating={compareProduct.avg_rating} count={compareProduct.rating_count||0} /> : <span className="text-xs text-gray-400">No ratings</span>}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desktop: table */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full text-sm min-w-[520px]">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="py-3 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest w-1/4">Feature</th>
+                          <th className="py-3 px-4 text-center text-xs font-bold text-red-500 uppercase tracking-widest">This Product</th>
+                          <th className="py-3 px-4 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">Compared</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-gray-50">
+                          <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Image</td>
+                          {[{ img: src, name: title }, { img: resolveImg(compareProduct.image), name: compareProduct.title || compareProduct.product_name }].map((x, i) => (
+                            <td key={i} className="py-4 px-4 text-center">
+                              {x.img ? <img src={x.img} className="h-28 w-20 object-cover rounded-2xl mx-auto shadow-sm" alt="" onError={e => e.currentTarget.style.display="none"} /> : <div className="h-28 w-20 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center"><Package className="w-6 h-6 text-gray-300" /></div>}
+                            </td>
+                          ))}
+                        </tr>
+                        <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Name</td><td className="py-4 px-4 text-center font-semibold text-gray-800 text-sm">{title}</td><td className="py-4 px-4 text-center font-semibold text-gray-800 text-sm">{compareProduct.title || compareProduct.product_name}</td></tr>
+                        <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Brand</td><td className="py-4 px-4 text-center text-gray-700">{product.brand || product.brand_name}</td><td className="py-4 px-4 text-center text-gray-700">{compareProduct.brand || compareProduct.brand_name}</td></tr>
+                        <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Price</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(product.price).toLocaleString()}</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(compareProduct.price).toLocaleString()}</td></tr>
+                        <tr className="border-b border-gray-50">
+                          <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</td>
+                          <td className="py-4 px-4"><div className="flex justify-center">{avgRating > 0 ? <StarRow rating={avgRating} count={ratingCount} /> : <span className="text-xs text-gray-400">No ratings yet</span>}</div></td>
+                          <td className="py-4 px-4"><div className="flex justify-center">{(Number(compareProduct.avg_rating)||0) > 0 ? <StarRow rating={compareProduct.avg_rating} count={compareProduct.rating_count||0} /> : <span className="text-xs text-gray-400">No ratings yet</span>}</div></td>
+                        </tr>
+                        <tr>
+                          <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Trending</td>
+                          <td className="py-4 px-4 text-center">{isTrend ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Yes</span> : <span className="text-xs text-gray-400">—</span>}</td>
+                          <td className="py-4 px-4 text-center">{Number(compareProduct.score)>15 ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Yes</span> : <span className="text-xs text-gray-400">—</span>}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </>
           )}

@@ -353,10 +353,10 @@ export default function ProductsPublic() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
         {brands.length > 2 && (
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+          <div className="flex flex-wrap gap-2 mb-6">
             {brands.map(b => (
               <button key={b} onClick={() => setActiveBrand(b)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
                   activeBrand === b
                     ? "bg-gray-900 text-white shadow-sm"
                     : "bg-white/80 text-gray-600 border border-white hover:bg-white"
