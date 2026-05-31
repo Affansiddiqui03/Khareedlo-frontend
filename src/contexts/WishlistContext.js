@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useContext } from "react";
 
 export const WishlistContext = createContext();
 
@@ -19,8 +19,15 @@ export function WishlistProvider({ children }) {
   };
 
   return (
-    <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist }}>
+    <WishlistContext.Provider
+      value={{ wishlist, addToWishlist, removeFromWishlist }}
+    >
       {children}
     </WishlistContext.Provider>
   );
 }
+
+// ✅ Hook (THIS FIXES YOUR ERROR)
+export const useWishlist = () => {
+  return useContext(WishlistContext);
+};

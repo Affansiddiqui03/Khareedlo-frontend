@@ -1,135 +1,98 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+// src/contexts/CartContext.js
+// PER-USER CART — each customer has their own cart keyed by user ID
+// No quantity increase/decrease — just add & remove (redirect-based platform)
+
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
-const LS_KEY = "khareedlo_cart_v1";
+// Key is per-user so carts never mix
+const cartKey = (userId) => userId ? `khareedlo_cart_${userId}` : null;
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
   const [cart, setCart] = useState([]);
-  const [coupon, setCoupon] = useState(null); // { code, type: 'percent' | 'flat', value }
 
-  // Load from localStorage
+  // Load this user's cart when user changes (login/logout/switch)
   useEffect(() => {
+    const key = cartKey(user?.id);
+    if (!key) {
+      setCart([]);   // Guest — empty cart
+      return;
+    }
     try {
-      const saved = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+      const saved = JSON.parse(localStorage.getItem(key) || "[]");
       setCart(Array.isArray(saved) ? saved : []);
     } catch {
       setCart([]);
     }
-  }, []);
+  }, [user?.id]);
 
-  // Persist to localStorage
+  // Persist whenever cart changes
   useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(cart));
-  }, [cart]);
+    const key = cartKey(user?.id);
+    if (!key) return;   // Don't persist guest cart
+    localStorage.setItem(key, JSON.stringify(cart));
+  }, [cart, user?.id]);
 
-  // Helpers
-  const normalizeId = (p) => p.id || `${p.name || "item"}-${p.image || "img"}`;
+  // ── Add product to cart (no duplicates — same product just stays) ──
+  const addToCart = (product) => {
+    if (!user) return;   // Must be logged in
 
-  const addToCart = (product, qty = 1) => {
-    const id = normalizeId(product);
+    const pid = String(product.product_id || product.id);
+
     setCart((prev) => {
-      const exists = prev.find((i) => i.id === id);
-      if (exists) {
-        return prev.map((i) =>
-          i.id === id ? { ...i, qty: Math.min(99, (i.qty || 1) + qty) } : i
-        );
-      }
+      const already = prev.find((i) => String(i.product_id) === pid);
+      if (already) return prev;   // Already in cart, don't add again
+
       return [
         ...prev,
         {
-          id,
-          name: product.name || product.title || "Product",
-          price: Number(product.price || 0),
-          image: product.image || product.thumbnail,
-          brand: product.brand || product.brandName,
-          sku: product.sku,
-          qty: Math.min(99, qty || 1),
+          product_id:   pid,
+          name:         product.product_name || product.title || product.name || "Product",
+          price:        Number(product.price || 0),
+          image:        product.image || null,
+          brand:        product.brand_name || product.brand || "",
+          brand_id:     product.brand_id || null,
+          buy_now_link: product.buy_now_link || product.brand_website || null,
+          added_at:     Date.now(),
         },
       ];
     });
   };
 
-  const updateQty = (id, qty) => {
-    setCart((prev) =>
-      prev
-        .map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(99, qty)) } : i))
-        .filter((i) => i.qty > 0)
-    );
+  // ── Remove a product from cart ──
+  const removeFromCart = (productId) => {
+    setCart((prev) => prev.filter((i) => String(i.product_id) !== String(productId)));
   };
 
-  const inc = (id) => {
-    setCart((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, qty: Math.min(99, i.qty + 1) } : i))
-    );
-  };
-
-  const dec = (id) => {
-    setCart((prev) =>
-      prev
-        .map((i) => (i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))
-        .filter((i) => i.qty > 0)
-    );
-  };
-
-  const removeFromCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
+  // ── Clear full cart ──
   const clearCart = () => setCart([]);
 
-  // Pricing
-  const subtotal = useMemo(
-    () => cart.reduce((sum, i) => sum + (i.price || 0) * (i.qty || 1), 0),
-    [cart]
+  // ── Check if product is already in cart ──
+  const isInCart = (productId) =>
+    cart.some((i) => String(i.product_id) === String(productId));
+
+  const totalItems = cart.length;
+  const totalPrice = cart.reduce((sum, i) => sum + (Number(i.price) || 0), 0);
+
+  return (
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        isInCart,
+        totalItems,
+        totalPrice,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
   );
-
-  const discount = useMemo(() => {
-    if (!coupon) return 0;
-    if (coupon.type === "percent") return Math.round((subtotal * coupon.value) / 100);
-    if (coupon.type === "flat") return Math.min(subtotal, coupon.value);
-    return 0;
-  }, [coupon, subtotal]);
-
-  // Simple shipping mock: free over 5000, else 250
-  const shipping = useMemo(() => (subtotal - discount > 5000 ? 0 : cart.length ? 250 : 0), [subtotal, discount, cart.length]);
-
-  const grandTotal = useMemo(() => Math.max(0, subtotal - discount + shipping), [subtotal, discount, shipping]);
-
-  // Coupon mock
-  const applyCoupon = (code) => {
-    const c = (code || "").trim().toUpperCase();
-    if (!c) return { ok: false, msg: "Enter a coupon code" };
-
-    if (c === "WELCOME10") {
-      setCoupon({ code: c, type: "percent", value: 10 });
-      return { ok: true, msg: "10% off applied!" };
-    }
-    if (c === "FLAT500") {
-      setCoupon({ code: c, type: "flat", value: 500 });
-      return { ok: true, msg: "PKR 500 off applied!" };
-    }
-    return { ok: false, msg: "Invalid coupon" };
-  };
-
-  const removeCoupon = () => setCoupon(null);
-
-  const value = {
-    cart,
-    addToCart,
-    updateQty,
-    inc,
-    dec,
-    removeFromCart,
-    clearCart,
-    coupon,
-    applyCoupon,
-    removeCoupon,
-    subtotal,
-    discount,
-    shipping,
-    grandTotal,
-  };
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export { CartContext };

@@ -1,15 +1,20 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Store, Box, Users, CheckCircle } from "lucide-react";
+import {
+  LayoutDashboard,
+  Store,
+  Box,
+  Users,
+  Package
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function AdminSidebar() {
   const { logout } = useAuth();
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2 rounded-xl transition ${
-      isActive
-        ? "bg-[#ffb48f] text-black"
-        : "text-gray-300 hover:bg-gray-800"
+    `flex items-center gap-3 px-4 py-2 rounded-xl transition ${isActive
+      ? "bg-[#ffb48f] text-black"
+      : "text-gray-300 hover:bg-gray-800"
     }`;
 
   return (
@@ -21,30 +26,33 @@ export default function AdminSidebar() {
         </h2>
 
         <nav className="space-y-3">
-          <NavLink to="/admin" end className={linkClass}>
+          <NavLink to="/admin" end className={ linkClass }>
             <LayoutDashboard /> Dashboard
           </NavLink>
 
-          <NavLink to="/admin/brands" className={linkClass}>
+          <NavLink to="/admin/brands" className={ linkClass }>
             <Store /> Brands
           </NavLink>
 
-          <NavLink to="/admin/products" className={linkClass}>
+          <NavLink to="/admin/products" className={ linkClass }>
             <Box /> Products
           </NavLink>
 
-          <NavLink to="/admin/pending-products" className={linkClass}>
-            <CheckCircle /> Approvals
+          <NavLink to="/admin/pending-products" className={ linkClass }>
+            <Package /> Product Approvals
+          </NavLink>
+          <NavLink>
+
           </NavLink>
 
-          <NavLink to="/admin/users" className={linkClass}>
+          <NavLink to="/admin/users" className={ linkClass }>
             <Users /> Customers
           </NavLink>
         </nav>
       </div>
 
       <button
-        onClick={logout}
+        onClick={ logout }
         className="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-semibold"
       >
         Logout
