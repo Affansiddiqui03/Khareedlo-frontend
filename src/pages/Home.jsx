@@ -115,9 +115,9 @@ export default function Home() {
               hasPrev && (
                 <button
                   onClick={onClickHandler}
-                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 hidden sm:flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95"
                 >
-                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
               )
             }
@@ -125,9 +125,9 @@ export default function Home() {
               hasNext && (
                 <button
                   onClick={onClickHandler}
-                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 hidden sm:flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95"
                 >
-                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               )
             }
@@ -253,29 +253,25 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 relative">
 
             {/* Header */}
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 text-red-600 text-xs font-bold uppercase tracking-wider mb-4">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <div className="text-center mb-8 sm:mb-16">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-red-50 border border-red-100 text-red-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse" />
                 {outlets.length} outlets across Pakistan
               </div>
 
-              <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
                 Find Your Nearest
                 <br />
                 <span
                   className="bg-clip-text text-transparent"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(135deg, #DC2626, #EA580C)",
-                  }}
+                  style={{ backgroundImage: "linear-gradient(135deg, #DC2626, #EA580C)" }}
                 >
                   Brand Outlet
                 </span>
               </h2>
 
-              <p className="mt-4 text-xl text-gray-500 max-w-2xl mx-auto">
-                All your favourite fashion brands — one map,
-                your city, your distance.
+              <p className="mt-3 sm:mt-4 text-sm sm:text-xl text-gray-500 max-w-2xl mx-auto px-4 sm:px-0">
+                All your favourite fashion brands — one map, your city, your distance.
               </p>
             </div>
 
@@ -335,92 +331,52 @@ export default function Home() {
             </div>
 
             {/* Search Section */}
-            <div className="bg-gradient-to-r from-gray-950 to-gray-800 rounded-3xl p-8 sm:p-12 text-white">
-              <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="bg-gradient-to-r from-gray-950 to-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-12 text-white">
+              <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
 
                 {/* Left */}
                 <div>
-                  <h3 className="text-3xl font-extrabold mb-3">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold mb-2 sm:mb-3">
                     Search by Brand or City
                   </h3>
-
-                  <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                    Type a brand name or city and jump straight
-                    to the interactive map.
+                  <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
+                    Type a brand name or city and jump straight to the interactive map.
                   </p>
-
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 sm:gap-3">
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        handleOutletSearch()
-                      }
+                      onKeyDown={(e) => e.key === "Enter" && handleOutletSearch()}
                       placeholder="Brand or city name…"
-                      className="flex-1 px-5 py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                      className="flex-1 min-w-0 px-3 sm:px-5 py-3 rounded-xl sm:rounded-2xl bg-white/10 border border-white/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     />
-
                     <button
                       onClick={handleOutletSearch}
                       disabled={!query.trim()}
-                      className="px-6 py-3.5 rounded-2xl font-bold text-sm text-white disabled:opacity-40"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #DC2626, #EA580C)",
-                      }}
+                      className="flex-shrink-0 px-4 sm:px-6 py-3 rounded-xl sm:rounded-2xl font-bold text-sm text-white disabled:opacity-40"
+                      style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}
                     >
                       Search
                     </button>
                   </div>
-
-                  <Link
-                    to="/explore"
-                    className="inline-flex items-center gap-2 mt-5 text-sm font-bold text-red-400 hover:text-red-300"
-                  >
+                  <Link to="/explore"
+                    className="inline-flex items-center gap-2 mt-4 text-xs sm:text-sm font-bold text-red-400 hover:text-red-300">
                     Open full interactive map →
                   </Link>
                 </div>
 
-                {/* Right */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* Right — stats */}
+                <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-2 md:mt-0">
                   {[
-                    {
-                      num: outlets.length,
-                      label: "Total Outlets",
-                      icon: "🏪",
-                    },
-                    {
-                      num: platformBrands.length,
-                      label: "Partner Brands",
-                      icon: "🏷️",
-                    },
-                    {
-                      num: cityOutletCounts.filter(
-                        (c) => c.count > 0
-                      ).length,
-                      label: "Cities Covered",
-                      icon: "🏙️",
-                    },
-                    {
-                      num: "Free",
-                      label: "Entry Always",
-                      icon: "✅",
-                    },
+                    { num: outlets.length,                                  label: "Total Outlets",  icon: "🏪" },
+                    { num: platformBrands.length,                           label: "Partner Brands", icon: "🏷️" },
+                    { num: cityOutletCounts.filter(c => c.count > 0).length,label: "Cities Covered", icon: "🏙️" },
+                    { num: "Free",                                           label: "Entry Always",   icon: "✅" },
                   ].map((s) => (
-                    <div
-                      key={s.label}
-                      className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center"
-                    >
-                      <p className="text-3xl mb-1">{s.icon}</p>
-
-                      <p className="text-2xl font-extrabold text-white">
-                        {s.num}
-                      </p>
-
-                      <p className="text-xs text-gray-400 font-semibold mt-0.5">
-                        {s.label}
-                      </p>
+                    <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center">
+                      <p className="text-2xl sm:text-3xl mb-0.5 sm:mb-1">{s.icon}</p>
+                      <p className="text-lg sm:text-2xl font-extrabold text-white">{s.num}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-400 font-semibold mt-0.5">{s.label}</p>
                     </div>
                   ))}
                 </div>

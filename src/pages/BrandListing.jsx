@@ -54,34 +54,42 @@ export default function BrandListing() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex justify-center my-4 px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full max-w-lg bg-gradient-to-r from-white/90 to-white/70
-                        backdrop-blur-xl border border-white/30 rounded-2xl sm:rounded-full shadow-lg p-2 gap-2">
-
-          <div className="relative flex-1">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"
-              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M21 21l-4.35-4.35m1.85-5.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z" />
-            </svg>
-            <input
-              value={q}
-              onChange={e => setQ(e.target.value)}
-              placeholder="Search brands..."
-              className="w-full pl-12 pr-4 py-2.5 rounded-full border border-gray-200
-                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                         outline-none text-sm bg-white/70 placeholder-gray-400"
-            />
-          </div>
-
+      <div className="px-4 sm:px-6 my-4 max-w-lg mx-auto w-full">
+        {/* Search input */}
+        <div className="relative mb-2">
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"
+            fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M21 21l-4.35-4.35m1.85-5.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z" />
+          </svg>
+          <input
+            value={q}
+            onChange={e => setQ(e.target.value)}
+            placeholder="Search brands..."
+            className="w-full pl-11 pr-4 py-3 rounded-2xl border border-white/40 bg-white/80 backdrop-blur-sm
+                       shadow-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400
+                       outline-none text-sm placeholder-gray-400"
+          />
+        </div>
+        {/* Sort filter */}
+        <div className="relative">
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none"
+            fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M6 12h12M10 17h4" />
+          </svg>
+          <svg className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none"
+            fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="px-4 py-2.5 rounded-full border border-gray-200 bg-white/80
-                       text-sm cursor-pointer focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
+            className="w-full pl-11 pr-10 py-3 rounded-2xl border border-white/40 bg-white/80 backdrop-blur-sm
+                       shadow-md focus:ring-2 focus:ring-indigo-400 text-sm cursor-pointer
+                       outline-none appearance-none"
           >
-            <option value="name">A–Z</option>
-            <option value="popular">Popular (Top Rated)</option>
+            <option value="name">Sort: A–Z</option>
+            <option value="popular">Sort: Popular (Top Rated)</option>
           </select>
         </div>
       </div>
