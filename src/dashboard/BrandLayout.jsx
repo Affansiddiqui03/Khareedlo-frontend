@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { NavLink, Outlet, useNavigate, Navigate } from "react-router-dom";
 import {
   LayoutDashboard, TrendingUp, Package,
-  FileText, User, LogOut, Menu, X, ShoppingBag,
+  FileText, User, LogOut, Menu, ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 

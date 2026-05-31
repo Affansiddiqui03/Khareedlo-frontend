@@ -6,7 +6,7 @@ import AdminLayout from "./AdminLayout";
 import {
   RefreshCw, CheckCircle, XCircle, Clock,
   Package, AlertTriangle, Zap, Database,
-  ArrowDownCircle, ChevronRight,
+  ArrowDownCircle,
 } from "lucide-react";
 
 const BRANDS = [
@@ -93,7 +93,7 @@ export default function AdminSync() {
 
   // Load last sync logs on mount
   useEffect(() => {
-    fetch("http://localhost:5000/api/sync/logs")
+    fetch("https://khareedlo-backend-production.up.railway.app/api/sync/logs")
       .then(r => r.json())
       .then(rows => {
         if (!Array.isArray(rows)) return;
@@ -111,7 +111,7 @@ export default function AdminSync() {
   const syncOne = async (brandKey) => {
     setSyncing(s => ({ ...s, [brandKey]: true }));
     try {
-      const res  = await fetch(`http://localhost:5000/api/sync/${brandKey}`, { method: "POST" });
+      const res  = await fetch(`https://khareedlo-backend-production.up.railway.app/api/sync/${brandKey}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sync failed");
       setResults(r => ({ ...r, [brandKey]: data.result }));
@@ -127,7 +127,7 @@ export default function AdminSync() {
   const syncAll = async () => {
     setSyncingAll(true);
     try {
-      const res  = await fetch("http://localhost:5000/api/sync/all", { method: "POST" });
+      const res  = await fetch("https://khareedlo-backend-production.up.railway.app/api/sync/all", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sync failed");
 

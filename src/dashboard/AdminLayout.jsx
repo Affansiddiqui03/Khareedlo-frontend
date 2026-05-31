@@ -20,7 +20,7 @@ export default function AdminLayout({ children }) {
     if (!user || user.role !== "admin") return;
     const fetchUnread = async () => {
       try {
-        const res  = await fetch("http://localhost:5000/api/contact/unread-count");
+        const res  = await fetch("https://khareedlo-backend-production.up.railway.app/api/contact/unread-count");
         const data = await res.json();
         setUnreadMsgs(data.count || 0);
       } catch {}

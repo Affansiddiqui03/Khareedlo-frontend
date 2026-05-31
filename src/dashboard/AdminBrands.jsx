@@ -51,7 +51,7 @@ export default function AdminBrands() {
   const fetchBrands = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/admin/brands");
+      const res = await fetch("https://khareedlo-backend-production.up.railway.app/api/admin/brands");
       const data = res.ok ? await res.json() : [];
       setBrands(Array.isArray(data) ? data : []);
     } catch {
@@ -63,7 +63,7 @@ export default function AdminBrands() {
 
   const fetchBrandProductCount = async (brandId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/brand/products/${brandId}`);
+      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/brand/products/${brandId}`);
       const data = res.ok ? await res.json() : [];
       setBrandProducts(prev => ({ ...prev, [brandId]: Array.isArray(data) ? data.length : 0 }));
     } catch {
@@ -87,7 +87,7 @@ export default function AdminBrands() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/brands/${deleteTarget.brand_id}`, {
+      const res = await fetch(`https://khareedlo-backend-production.up.railway.app/api/admin/brands/${deleteTarget.brand_id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error();
@@ -163,7 +163,7 @@ export default function AdminBrands() {
             {filtered.map(brand => {
               const grad = getGradient(brand.brand_name);
               const productCount = brandProducts[brand.brand_id] ?? "—";
-              const logoUrl = brand.logo ? `http://localhost:5000/${brand.logo}` : null;
+              const logoUrl = brand.logo ? `https://khareedlo-backend-production.up.railway.app/${brand.logo}` : null;
 
               return (
                 <div key={brand.brand_id}

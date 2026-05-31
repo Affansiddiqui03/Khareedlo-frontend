@@ -113,6 +113,7 @@ export default function ProductDetail() {
     }).catch(() => {});
   }, [user?.id, product?.id]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!id) return;
     const url = user?.id ? `${IMG_BASE}/api/ratings/product/${id}?customer_id=${user.id}` : `${IMG_BASE}/api/ratings/product/${id}`;
