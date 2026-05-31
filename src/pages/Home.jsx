@@ -145,7 +145,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
                   <div className="text-center px-4 sm:px-10 max-w-2xl">
                     <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight">
-                      Discover Premium
+                      Discover Premium{" "}
                       <br className="hidden sm:block" />
                       Fashion Brands
                     </h1>

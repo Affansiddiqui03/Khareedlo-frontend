@@ -295,75 +295,32 @@ export default function BrandDetails() {
 
       {/* ── CONTENT ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 sm:mt-10">
+        <div className="grid lg:grid-cols-4 gap-6 lg:gap-10">
 
-        {/* Mobile: horizontal category pills */}
-        <div className="lg:hidden mb-5">
-          <div className="overflow-x-auto pb-2 -mx-4 px-4">
-            <div className="flex gap-2 w-max">
-              <button
-                onClick={() => { setActiveCat(null); setActiveSubCat(null); }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
-                  !activeCategory ? "bg-red-600 text-white shadow-md" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                All Products
-              </button>
-              {categories.map(cat => (
-                <button
-                  key={cat.category_id}
-                  onClick={() => { setActiveCat(cat.category_id); setActiveSubCat(null); }}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
-                    activeCategory === cat.category_id ? "bg-red-600 text-white shadow-md" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {cat.category_name}
-                </button>
-              ))}
-            </div>
-          </div>
-          {activeCategory && subCategories.length > 0 && (
-            <div className="overflow-x-auto pb-1 mt-2 -mx-4 px-4">
-              <div className="flex gap-2 w-max">
-                {subCategories.map(sub => (
-                  <button
-                    key={sub.sub_category_id}
-                    onClick={() => setActiveSubCat(sub.sub_category_id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
-                      activeSubCat === sub.sub_category_id ? "bg-gray-900 text-white" : "bg-white/80 border border-gray-200 text-gray-600"
-                    }`}
-                  >
-                    {sub.sub_category_name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+          {/* Categories sidebar — normal flow on mobile, sticky on desktop */}
+          <aside className="bg-white rounded-3xl shadow-xl p-5 h-fit lg:sticky lg:top-20">
+            <h3 className="font-bold mb-3 text-gray-500 text-sm uppercase tracking-wider">Categories</h3>
 
-        {/* Desktop: sidebar + products grid */}
-        <div className="grid lg:grid-cols-4 gap-10">
-
-          {/* Categories sidebar — desktop only */}
-          <aside className="hidden lg:block bg-white rounded-3xl shadow-xl p-6 h-fit sticky top-20">
-            <h3 className="font-bold mb-4 text-gray-900">Categories</h3>
             <button
               onClick={() => { setActiveCat(null); setActiveSubCat(null); }}
-              className={`block w-full text-left py-2 px-3 rounded-lg text-sm mb-2 transition-colors ${
-                !activeCategory ? "bg-red-600 text-white" : "hover:bg-gray-100"
+              className={`block w-full text-left py-2 px-3 rounded-lg text-sm mb-1 transition-colors ${
+                !activeCategory ? "bg-red-600 text-white font-semibold" : "hover:bg-gray-100 text-gray-700"
               }`}
             >
               All Products
             </button>
+
             {categories.map(cat => (
               <div key={cat.category_id}>
                 <button
                   onClick={() => { setActiveCat(cat.category_id); setActiveSubCat(null); }}
                   className={`block w-full text-left py-2 px-3 rounded-lg text-sm mb-1 transition-colors ${
-                    activeCategory === cat.category_id ? "bg-red-600 text-white" : "hover:bg-gray-100"
+                    activeCategory === cat.category_id ? "bg-red-600 text-white font-semibold" : "hover:bg-gray-100 text-gray-700"
                   }`}
                 >
                   {cat.category_name}
                 </button>
+
                 {activeCategory === cat.category_id && subCategories.length > 0 && (
                   <div className="ml-4 mb-1 space-y-0.5">
                     {subCategories.map(sub => (
@@ -371,7 +328,9 @@ export default function BrandDetails() {
                         key={sub.sub_category_id}
                         onClick={() => setActiveSubCat(sub.sub_category_id)}
                         className={`block text-sm py-1 px-2 rounded-lg w-full text-left transition-colors ${
-                          activeSubCat === sub.sub_category_id ? "text-red-600 font-semibold" : "text-gray-600 hover:bg-gray-50"
+                          activeSubCat === sub.sub_category_id
+                            ? "text-red-600 font-semibold"
+                            : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         {sub.sub_category_name}
@@ -385,9 +344,10 @@ export default function BrandDetails() {
 
           {/* Products grid */}
           <main className="lg:col-span-3">
-            <h2 className="text-xl sm:text-2xl font-bold mb-5 sm:mb-6 text-gray-900">
+            <h2 className="text-xl sm:text-2xl font-bold mb-5 text-gray-900">
               Products ({filteredProducts.length})
             </h2>
+
             {filteredProducts.length === 0 ? (
               <div className="bg-white rounded-2xl py-16 text-center border border-gray-100">
                 <Package className="w-12 h-12 text-gray-200 mx-auto mb-3" />

@@ -229,101 +229,134 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE DRAWER */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setMobileOpen(false)}
-          />
+      {/* MOBILE DRAWER — always mounted, slides in/out */}
+      <div
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ${
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />
 
-          {/* Drawer */}
-          <div className="relative w-72 h-full flex flex-col bg-[#0C0420] backdrop-blur-xl shadow-2xl text-white">
+        {/* Drawer panel — slides from left */}
+        <div
+          className={`absolute left-0 top-0 h-full z-10 flex flex-col text-white transition-transform duration-300 ease-out ${
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+          style={{
+            width: "min(80vw, 300px)",
+            background: "linear-gradient(160deg, #0C0420 0%, #100818 60%, #0C0420 100%)",
+            boxShadow: "6px 0 40px rgba(0,0,0,0.6)",
+          }}
+        >
+          {/* Decorative top gradient blob */}
+          <div className="absolute top-0 left-0 right-0 h-32 pointer-events-none overflow-hidden rounded-none">
+            <div className="absolute -top-6 -left-6 w-40 h-40 rounded-full opacity-20"
+              style={{ background: "radial-gradient(circle, #DC2626, transparent)" }} />
+          </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-black text-xs">K</span>
-                </div>
-                <span className="text-white font-bold text-base tracking-tight">Khareedlo</span>
+          {/* Header */}
+          <div className="relative flex items-center justify-between px-5 pt-6 pb-5 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-lg"
+                style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}>
+                <span className="text-white font-black text-sm">K</span>
               </div>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div>
+                <p className="text-white font-bold text-base leading-tight">Khareedlo</p>
+                <p className="text-white/30 text-[10px] tracking-widest uppercase">Pakistan Fashion</p>
+              </div>
             </div>
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            >
+              <X className="w-4 h-4 text-white/70" />
+            </button>
+          </div>
 
-            {/* User greeting */}
-            {user && (
-              <div className="mx-4 mt-4 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-orange-400 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                  {user.name?.[0]?.toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-white text-sm font-semibold truncate">{user.name}</p>
-                  <p className="text-white/40 text-xs truncate">{user.email}</p>
-                </div>
+          {/* User card */}
+          {user && (
+            <div className="mx-4 mt-4 px-3.5 py-3 rounded-2xl flex items-center gap-3"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-lg"
+                style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}>
+                {user.name?.[0]?.toUpperCase()}
               </div>
-            )}
+              <div className="min-w-0">
+                <p className="text-white text-sm font-semibold truncate">{user.name}</p>
+                <p className="text-white/35 text-[11px] truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
 
-            {/* Nav Links */}
-            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-              {links.map((l) => (
-                <NavLink
-                  key={l.label}
-                  to={l.to}
-                  end={l.to === "/"}
-                  onClick={() => setMobileOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
-                      isActive
-                        ? "bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg"
-                        : "text-white/60 hover:text-white hover:bg-white/8"
-                    }`
-                  }
-                >
-                  {l.label}
-                </NavLink>
-              ))}
+          {/* Nav links */}
+          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-3 mb-3">Menu</p>
+            {links.map((l) => (
+              <NavLink
+                key={l.label}
+                to={l.to}
+                end={l.to === "/"}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `relative flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                    isActive
+                      ? "text-white"
+                      : "text-white/50 hover:text-white/90 hover:bg-white/5"
+                  }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? { background: "linear-gradient(135deg, rgba(220,38,38,0.25), rgba(234,88,12,0.15))", border: "1px solid rgba(220,38,38,0.2)" }
+                    : {}
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#DC2626,#EA580C)" }} />}
+                    {l.label}
+                  </>
+                )}
+              </NavLink>
+            ))}
 
-              {/* Divider */}
-              <div className="my-3 border-t border-white/10" />
+            <div className="my-3 border-t border-white/[0.08]" />
 
-              {/* Auth links */}
-              {user ? (
-                <>
-                  <Link
-                    to={user.role === "admin" ? "/admin" : user.role === "brand" ? "/brand" : "/dashboard"}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/8 transition-all"
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={() => { handleLogout(); setMobileOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
+            {user ? (
+              <>
                 <Link
-                  to="/auth"
+                  to={user.role === "admin" ? "/admin" : user.role === "brand" ? "/brand" : "/dashboard"}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 mt-2 bg-gradient-to-r from-red-600 to-orange-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/50 hover:text-white/90 hover:bg-white/5 transition-all"
                 >
-                  Login / Sign Up
+                  Dashboard
                 </Link>
-              )}
-            </nav>
+                <button
+                  onClick={() => { handleLogout(); setMobileOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 mt-3 py-3.5 rounded-2xl font-bold text-sm text-white shadow-xl transition-all hover:opacity-90 active:scale-95"
+                style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}
+              >
+                Login / Sign Up
+              </Link>
+            )}
+          </nav>
+
+          {/* Bottom branding */}
+          <div className="px-5 py-4 border-t border-white/[0.06]">
+            <p className="text-white/20 text-[10px] text-center tracking-wider">© 2025 Khareedlo</p>
           </div>
         </div>
-      )}
+      </div>
 
       {/* SEARCH MODAL */}
       {showSearch && (
