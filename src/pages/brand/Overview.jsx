@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Package, ShoppingCart, ExternalLink, TrendingUp, Star } from "lucide-react";
+import { Package, ShoppingCart, ExternalLink, TrendingUp } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, Legend,
@@ -15,7 +15,7 @@ import {
 
 const defaultTheme = { accent: "#4F46E5", accentLight: "#818CF8" };
 
-const IMG_BASE = "http://localhost:5000";
+const IMG_BASE = "https://khareedlo-backend-production.up.railway.app";
 
 export default function Overview() {
   const { user } = useAuth();
@@ -36,8 +36,8 @@ export default function Overview() {
       setLoading(true);
       try {
         const [overviewRes, posRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/brand/overview/${brandId}`),
-          fetch(`http://localhost:5000/api/brand/pos/summary/${brandId}`),
+          fetch(`https://khareedlo-backend-production.up.railway.app/api/brand/overview/${brandId}`),
+          fetch(`https://khareedlo-backend-production.up.railway.app/api/brand/pos/summary/${brandId}`),
         ]);
 
         const overviewData = overviewRes.ok ? await overviewRes.json() : {};

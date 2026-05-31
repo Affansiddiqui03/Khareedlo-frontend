@@ -145,7 +145,7 @@ export default function UserMessages() {
     if (!user?.id) return;
     setLoading(true); setError("");
     try {
-      const res  = await fetch(`http://localhost:5000/api/contact/user/${user.id}`);
+      const res  = await fetch(`https://khareedlo-backend-production.up.railway.app/api/contact/user/${user.id}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       setMessages(Array.isArray(data) ? data : []);
@@ -156,6 +156,7 @@ export default function UserMessages() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchMessages(); }, [user?.id]);
 
   const unreplied = messages.filter(m => !m.replied).length;

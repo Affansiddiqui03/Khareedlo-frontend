@@ -8,7 +8,7 @@ import { CartContext } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useProductClickTracker } from "../hooks/useTracker";
 import {
-  Search, SlidersHorizontal, Star, ShoppingCart,
+  Search, Star, ShoppingCart,
   ExternalLink, Package, X, ChevronDown, ArrowUpDown,
   CheckCircle, Lock, Sparkles, Filter,
 } from "lucide-react";
@@ -28,7 +28,7 @@ const GENDERS = ["All", "Men", "Women", "Kids", "Unisex"];
 function imgSrc(image) {
   if (!image || image === "photos/" || image.trim() === "") return null;
   if (image.startsWith("http")) return image;
-  return `http://localhost:5000/${image}`;
+  return `https://khareedlo-backend-production.up.railway.app/${image}`;
 }
 
 function ProductCard({ product, onAddToCart, canInteract, trackClick }) {
@@ -175,7 +175,7 @@ export default function ProductsPublic() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:5000/api/products")
+    fetch("https://khareedlo-backend-production.up.railway.app/api/products")
       .then(r => r.json())
       .then(d => { setProducts(Array.isArray(d) ? d : d.products || []); setLoading(false); })
       .catch(() => setLoading(false));
@@ -225,7 +225,7 @@ export default function ProductsPublic() {
   const handleAddToCart = (product) => {
     if (!user) { navigate("/auth"); return; }
     addToCart(product);
-    fetch("http://localhost:5000/api/pos/track", {
+    fetch("https://khareedlo-backend-production.up.railway.app/api/pos/track", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ brand_id: product.brand_id, product_id: product.id || product.product_id, action: "ADD_TO_CART" }),
     }).catch(() => {});

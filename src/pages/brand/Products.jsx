@@ -12,7 +12,7 @@ import {
   Globe, Loader2,
 } from "lucide-react";
 
-const IMG_BASE = "http://localhost:5000";
+const IMG_BASE = "https://khareedlo-backend-production.up.railway.app";
 
 const STATUS_CONFIG = {
   APPROVED: { label: "Live",    bg: "bg-emerald-50", color: "text-emerald-700", icon: CheckCircle },
@@ -60,6 +60,7 @@ export default function Products() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchProducts(); }, [brandId]);
 
   const handleImageChange = (e) => {

@@ -5,11 +5,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import AdminLayout from "../../dashboard/BrandLayout";
 import {
   ShoppingBag, TrendingUp, PackageCheck,
   RefreshCw, ExternalLink, Clock, CheckCircle,
-  Truck, Filter, Package,
+  Truck, Package,
 } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -42,13 +41,14 @@ export default function PlatformOrders() {
     if (!brandId) return;
     setLoading(true);
     try {
-      const res  = await fetch(`http://localhost:5000/api/orders/brand/${brandId}`);
+      const res  = await fetch(`https://khareedlo-backend-production.up.railway.app/api/orders/brand/${brandId}`);
       const json = await res.json();
       setData(json);
     } catch { setData({ orders: [], summary: {} }); }
     finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchOrders(); }, [brandId]);
 
   const filtered = filter === "all"

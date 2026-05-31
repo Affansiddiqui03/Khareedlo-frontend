@@ -59,7 +59,7 @@ export default function UserDashboard() {
     if (!customerId) return;
     setLoading(true);
     try {
-      const res  = await fetch(`http://localhost:5000/api/user/dashboard?customer_id=${customerId}`);
+      const res  = await fetch(`https://khareedlo-backend-production.up.railway.app/api/user/dashboard?customer_id=${customerId}`);
       const data = await res.json();
       setStats(data.stats || {});
       setRecentProducts(Array.isArray(data.recentProducts) ? data.recentProducts : []);
@@ -71,6 +71,7 @@ export default function UserDashboard() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchDashboard(); }, [customerId]);
 
   const hasChartData = weeklyChart.some(d =>
@@ -180,7 +181,7 @@ export default function UserDashboard() {
                   <div className="h-28 bg-gray-100 overflow-hidden">
                     {p.image ? (
                       <img
-                        src={p.image.startsWith("http") ? p.image : `http://localhost:5000/${p.image}`}
+                        src={p.image.startsWith("http") ? p.image : `https://khareedlo-backend-production.up.railway.app/${p.image}`}
                         alt={p.product_name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={e => { e.currentTarget.style.display = "none"; }}
