@@ -7,6 +7,7 @@ import {
   Package
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import KhareedloLogo from "../assets/khareedlo.png";
 
 export default function AdminSidebar() {
   const { logout } = useAuth();
@@ -20,10 +21,13 @@ export default function AdminSidebar() {
   return (
     <div className="w-64 bg-gray-900 text-white min-h-screen p-6 flex flex-col justify-between">
       <div>
-        <h2 className="text-2xl font-extrabold mb-10">
-          KHAREEDLO
-          <span className="block text-sm text-gray-400">Admin Panel</span>
-        </h2>
+        <div className="mb-8">
+          <img
+            src={ KhareedloLogo }
+            alt="Khareedlo"
+            className="h-32 w-auto mb-1"
+          />  <span className="block text-xs text-gray-400 font-semibold tracking-widest uppercase pl-1">Admin Panel</span>
+        </div>
 
         <nav className="space-y-3">
           <NavLink to="/admin" end className={ linkClass }>

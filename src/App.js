@@ -1,8 +1,7 @@
 // src/App.js — FINAL with Platform Orders route added
 
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar  from "./components/Navbar";
 import Loader  from "./components/Loader";
 
@@ -53,6 +52,13 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 function WithNav({ children }) {
   return <><Navbar />{children}</>;
 }
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
   const [booting, setBooting] = useState(true);
@@ -64,6 +70,8 @@ export default function App() {
       <CartProvider>
         <WishlistProvider>
           <Router>
+              <ScrollToTop />
+
             <Routes>
 
               {/* ── PUBLIC ── */}

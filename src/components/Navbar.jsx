@@ -6,8 +6,8 @@ import {
   Home, Store, Package, Compass, Mail, LayoutDashboard, LogOut,
 } from "lucide-react";
 
-import BrandLogo from "../assets/Brandlogo.png";
 import pakistanFlag from "../assets/pakistan.svg";
+import BrandLogo from "../assets/khareedlo.png";
 
 import { CartContext } from "../contexts/CartContext";
 import { brands } from "../data/demoData";
@@ -94,15 +94,12 @@ export default function Navbar() {
         {/* Header */}
         <div className="relative flex items-center justify-between px-5 pt-6 pb-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-xl"
-              style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}>
-              <span className="text-white font-black text-sm">K</span>
-            </div>
-            <div>
-              <p className="text-white font-bold text-base leading-tight">Khareedlo</p>
-              <p className="text-white/30 text-[10px] tracking-widest uppercase">Pakistan Fashion</p>
-            </div>
-          </div>
+  <img
+    src={BrandLogo}
+    alt="Khareedlo"
+    className="h-24 w-auto object-contain"
+  />
+</div>
           <button
             onClick={() => setMobileOpen(false)}
             className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
@@ -241,7 +238,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={BrandLogo} alt="Khareedlo" className="h-12 sm:h-16 w-auto object-contain" />
+            <img src={BrandLogo} alt="Khareedlo" className="h-20 sm:h-32 w-auto object-contain" />
           </Link>
 
           {/* Desktop Links */}
