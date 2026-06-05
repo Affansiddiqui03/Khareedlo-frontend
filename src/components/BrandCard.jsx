@@ -100,7 +100,8 @@ export default function BrandCard({ brand }) {
   };
 
   const hardcodedLogo = HARDCODED_LOGOS[brand.name];
-  const dynamicLogo   = brand.logo ? `https://khareedlo-backend-production.up.railway.app/${brand.logo}` : null;
+  // Cloudinary returns full URL - use directly
+  const dynamicLogo   = brand.logo ? (brand.logo.startsWith("http") ? brand.logo : `https://khareedlo-backend-production.up.railway.app/${brand.logo}`) : null;
   const logoSrc       = hardcodedLogo || dynamicLogo;
   const gradient      = getBrandGradient(brand.name);
 

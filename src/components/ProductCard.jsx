@@ -84,7 +84,7 @@ export default function ProductCard({ product, onAddToCart, disableAdd }) {
   const imgSrc = product.image && product.image !== "photos/" && product.image !== ""
     ? product.image.startsWith("http")
       ? product.image
-      : `https://khareedlo-backend-production.up.railway.app/${product.image}`
+      : (product.image.startsWith("http") ? product.image : `https://khareedlo-backend-production.up.railway.app/${product.image}`)
     : `https://khareedlo-backend-production.up.railway.app/photos/placeholder.png`;
 
   return (

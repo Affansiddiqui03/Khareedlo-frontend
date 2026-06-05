@@ -18,6 +18,7 @@ const IMG_BASE = "https://khareedlo-backend-production.up.railway.app";
 
 function resolveImg(img) {
   if (!img || img === "photos/" || img.trim() === "") return null;
+  if (img.startsWith("http")) return img; // Cloudinary URL
   if (img.startsWith("http")) return img;
   return `${IMG_BASE}/${img}`;
 }

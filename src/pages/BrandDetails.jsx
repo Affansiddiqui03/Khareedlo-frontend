@@ -195,7 +195,21 @@ export default function BrandDetails() {
   );
 
   // ── ASSET RESOLUTION (fallback for new/unknown brands) ────
-  const assets         = brandAssets[brand.name] || {};
+  // Use DB banner/logo first (new brands), fallback to hardcoded assets (old 4 brands)
+  const staticAssets   = brandAssets[brand.name] || {};
+  const BASE           = "https://khareedlo-backend-production.up.railway.app/";
+  // Cloudinary returns full https:// URL — use directly; fallback to BASE+path for old local uploads
+  const dbBanner = brand.banner
+    ? (brand.banner.startsWith("http") ? brand.banner : BASE + "/" + brand.banner)
+    : null;
+  const dbLogo = brand.logo
+    ? (brand.logo.startsWith("http") ? brand.logo : BASE + "/" + brand.logo)
+    : null;
+  const assets         = {
+    banner: dbBanner || staticAssets.banner || null,
+    logo:   dbLogo   || staticAssets.logo   || null,
+    phone:  staticAssets.phone || brand.contact || null,
+  };
   const hasBanner      = !!assets.banner;
   const hasLogo        = !!assets.logo;
   const grad           = brandGradient(brand.name);
