@@ -63,8 +63,11 @@ export default function AdminProducts() {
   };
 
   const getImageSrc = (image) => {
-    if (!image || image === "photos/") return null;
-    if (image.startsWith("http")) return image; // Cloudinary full URL
+    if (!image) return null;
+    // Cloudinary URL — use directly
+    if (image.startsWith("http")) return image;
+    // Old local disk path (photos/...) — Railway doesn't have these files, skip
+    if (image.startsWith("photos/")) return null;
     return `${BASE}/${image}`;
   };
 

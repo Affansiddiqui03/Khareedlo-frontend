@@ -10,7 +10,40 @@ import {
 } from "lucide-react";
 
 const API = "https://khareedlo-backend-production.up.railway.app/api";
-const validEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.trim());
+const VALID_TLDS = new Set([
+  "com","net","org","edu","gov","io","co","pk","uk","us","ca","au",
+  "de","fr","in","ae","sa","bd","np","lk","mv","af","iq","store",
+  "online","shop","info","biz","me","app","dev","tech","digital",
+  "web","site","blog","news","media","tv","fm","am","email","mail",
+  "academy","agency","art","asia","auto","cafe","care","city","click",
+  "cloud","club","company","cool","design","eco","events","expert",
+  "express","family","fashion","finance","fit","food","fun","gallery",
+  "global","health","help","home","host","house","inc","jobs","land",
+  "legal","life","live","local","ltd","luxury","market","money","mobi",
+  "network","ninja","one","page","pay","pet","photo","photography",
+  "photos","pizza","place","plus","pro","properties","pub","rent",
+  "restaurant","school","services","social","software","solutions",
+  "space","style","support","systems","tax","team","today","tools",
+  "travel","ventures","video","vision","watch","world","zone"
+]);
+
+const validEmail = (s) => {
+  if (!s || typeof s !== "string") return false;
+  const trimmed = s.trim().toLowerCase();
+  const regex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,10}$/;
+  if (!regex.test(trimmed)) return false;
+  const parts = trimmed.split("@");
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts;
+  if (!local) return false;
+  if (!domain.includes(".")) return false;
+  if (trimmed.includes("..")) return false;
+  const domainParts = domain.split(".");
+  if (domainParts.some(p => p.length === 0)) return false;
+  const tld = domainParts[domainParts.length - 1];
+  if (tld.length === 2) return true;
+  return VALID_TLDS.has(tld);
+};
 
 function Field({ icon: Icon, type = "text", placeholder, value, onChange, error, rightEl }) {
   return (
@@ -110,6 +143,13 @@ export default function Auth() {
   const [fpConfirm, setFpConfirm] = useState("");
 
   const [errs, setErrs] = useState({});
+  // Disable submit until required fields filled
+  const customerLoginReady  = validEmail(cEmail) && cPass.length > 0;
+  const customerRegReady    = cName.trim() && validEmail(cEmail) && cPass.length >= 6 && cPass === cConfirm;
+  const brandLoginReady     = validEmail(bEmail) && bPass.length > 0;
+  const brandRegReady       = bName.trim() && validEmail(bEmail) && bPass.length >= 6 && bPass === bConfirm;
+  const adminLoginReady     = validEmail(aEmail) && aPass.length > 0;
+  const forgotReady         = validEmail(fpEmail) && fpNew.length >= 6 && fpNew === fpConfirm;
 
   const clearAll = () => {
     setMsg(null); setErrs({});
@@ -308,7 +348,7 @@ export default function Auth() {
                 value={fpNew} onChange={e => setFpNew(e.target.value)} error={errs.fpNew} />
               <PasswordField placeholder="Confirm new password"
                 value={fpConfirm} onChange={e => setFpConfirm(e.target.value)} error={errs.fpConfirm} />
-              <button type="submit" disabled={loading}
+              <button type="submit" disabled={loading || !forgotReady}
                 className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-sm shadow-lg hover:opacity-90 active:scale-[0.98] transition disabled:opacity-60">
                 {loading ? "Updating..." : "Reset Password"}
               </button>
@@ -338,7 +378,7 @@ export default function Auth() {
                   </button>
                 </div>
               )}
-              <button type="submit" disabled={loading}
+              <button type="submit" disabled={loading || (mode === "login" ? !customerLoginReady : !customerRegReady)}
                 className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-sm shadow-lg hover:opacity-90 active:scale-[0.98] transition disabled:opacity-60">
                 {loading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
               </button>
@@ -391,7 +431,7 @@ export default function Auth() {
                   </div>
                 </>
               )}
-              <button type="submit" disabled={loading}
+              <button type="submit" disabled={loading || (mode === "login" ? !brandLoginReady : !brandRegReady)}
                 className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-sm shadow-lg hover:opacity-90 active:scale-[0.98] transition disabled:opacity-60">
                 {loading ? "Please wait..." : mode === "login" ? "Brand Login" : "Register Brand"}
               </button>
@@ -409,7 +449,7 @@ export default function Auth() {
                 value={aEmail} onChange={e => setAEmail(e.target.value)} error={errs.aEmail} />
               <PasswordField placeholder="Admin password"
                 value={aPass} onChange={e => setAPass(e.target.value)} error={errs.aPass} />
-              <button type="submit" disabled={loading}
+              <button type="submit" disabled={loading || !adminLoginReady}
                 className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold text-sm shadow-lg hover:opacity-90 active:scale-[0.98] transition disabled:opacity-60">
                 {loading ? "Verifying..." : "Admin Login"}
               </button>

@@ -11,6 +11,7 @@ import zellburyLogo  from "../assets/brand4.jpeg";
 import jLogo         from "../assets/brand2.png";
 import alkaramLogo   from "../assets/brand3.png";
 import limelightLogo from "../assets/brand1.jpg";
+import { brandAssets } from "../data/brandAssets";
 
 const HARDCODED_LOGOS = {
   "J. By Junaid Jamshed": jLogo,
@@ -99,17 +100,34 @@ export default function BrandCard({ brand }) {
     }
   };
 
+  // Logo: Cloudinary URL (new brands) OR hardcoded asset (old 4 brands)
   const hardcodedLogo = HARDCODED_LOGOS[brand.name];
-  // Cloudinary returns full URL - use directly
-  const dynamicLogo   = brand.logo ? (brand.logo.startsWith("http") ? brand.logo : `https://khareedlo-backend-production.up.railway.app/${brand.logo}`) : null;
-  const logoSrc       = hardcodedLogo || dynamicLogo;
-  const gradient      = getBrandGradient(brand.name);
+  const dynamicLogo = brand.logo
+    ? (brand.logo.startsWith("http") ? brand.logo : null) // only use if Cloudinary URL
+    : null;
+  const logoSrc = dynamicLogo || hardcodedLogo || null;
+
+  // Banner: Cloudinary URL (new brands) OR static asset (old 4 brands)
+  const staticAssets = brandAssets[brand.name] || {};
+  const dynamicBanner = brand.banner
+    ? (brand.banner.startsWith("http") ? brand.banner : null)
+    : null;
+  const bannerSrc = dynamicBanner || staticAssets.banner || null;
+
+  const gradient = getBrandGradient(brand.name);
 
   return (
     <>
       <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1">
-        {/* Banner */}
-        <div className={`h-28 bg-gradient-to-br ${gradient} relative`} />
+        {/* Banner - DB banner (Cloudinary) or static asset or gradient */}
+        <div className={`h-28 relative overflow-hidden ${bannerSrc ? "bg-gray-100" : `bg-gradient-to-br ${gradient}`}`}>
+          {bannerSrc && (
+            <img src={bannerSrc} alt="banner"
+              className="w-full h-full object-cover"
+              onError={e => { e.target.style.display="none"; e.target.parentNode.className = `h-28 relative overflow-hidden bg-gradient-to-br ${gradient}`; }}
+            />
+          )}
+        </div>
 
         <div className="relative px-5 pb-6">
           {/* Logo */}

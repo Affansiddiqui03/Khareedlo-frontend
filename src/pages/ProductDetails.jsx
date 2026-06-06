@@ -232,10 +232,19 @@ export default function ProductDetail() {
                 </button>
               </div>
               {hasLink && (
-                <button onClick={handleBuyNow}
-                  className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm border-2 transition-all ${user ? "border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white hover:-translate-y-0.5" : "border-gray-200 text-gray-400"}`}>
-                  {user ? <><ExternalLink className="w-4 h-4" /> Buy Now on Brand Website</> : <><Lock className="w-4 h-4" /> Login to Buy Now</>}
-                </button>
+                <div className="relative group/buynow">
+                  <button onClick={handleBuyNow}
+                    className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm border-2 transition-all ${user ? "border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white hover:-translate-y-0.5" : "border-gray-200 text-gray-400"}`}>
+                    {user ? <><ExternalLink className="w-4 h-4" /> Buy Now on Brand Website</> : <><Lock className="w-4 h-4" /> Login to Buy Now</>}
+                  </button>
+                  {/* Redirect warning tooltip */}
+                  {user && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-gray-900 text-white text-xs rounded-xl px-3 py-2.5 shadow-2xl opacity-0 group-hover/buynow:opacity-100 pointer-events-none transition-opacity duration-200 z-20 text-center">
+                      <span className="text-amber-400 font-bold">⚠ Heads up!</span> You'll be taken to <strong>{product.brand || "the brand"}'s official website</strong> to complete your purchase.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                    </div>
+                  )}
+                </div>
               )}
               {!user && <p className="text-center text-xs text-red-500 font-medium">⚠ Please <button onClick={() => setShowLogin(true)} className="underline font-bold">login</button> to shop</p>}
             </div>

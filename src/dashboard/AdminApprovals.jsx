@@ -196,8 +196,8 @@ export default function AdminApprovals() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
-                              {p.image && p.image !== "photos/" ? (
-                                <img src={`https://khareedlo-backend-production.up.railway.app/${p.image}`} alt={p.product_name}
+                              {p.image ? (
+                                <img src={p.image ? (p.image.startsWith("http") ? p.image : `https://khareedlo-backend-production.up.railway.app/${p.image}`) : null} alt={p.product_name}
                                   className="w-full h-full object-cover"
                                   onError={e => e.target.style.display = "none"} />
                               ) : (
@@ -294,8 +294,8 @@ export default function AdminApprovals() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="h-64 bg-gray-100 overflow-hidden">
-              {preview.image && preview.image !== "photos/" ? (
-                <img src={`https://khareedlo-backend-production.up.railway.app/${preview.image}`} alt={preview.product_name}
+              {preview.image ? (
+                <img src={preview.image ? (preview.image.startsWith("http") ? preview.image : `https://khareedlo-backend-production.up.railway.app/${preview.image}`) : null} alt={preview.product_name}
                   className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

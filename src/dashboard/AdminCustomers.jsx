@@ -100,7 +100,7 @@ export default function AdminCustomers() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {[
             { label: "Total Registered", value: customers.length, color: "#7C3AED" },
             { label: "Shown in Search", value: filtered.length, color: "#0EA5E9" },
