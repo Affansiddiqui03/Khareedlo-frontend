@@ -62,11 +62,17 @@ function CartItem({ item, onRemove, onBuy }) {
 
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {item.buy_now_link ? (
-            <button onClick={() => onBuy(item)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-bold transition-all hover:shadow-lg hover:-translate-y-0.5"
-              style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}>
-              <ExternalLink className="w-3.5 h-3.5" /> Buy on Brand Website
-            </button>
+            <div className="relative group/cartbuy">
+              <button onClick={() => onBuy(item)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-bold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                style={{ background: "linear-gradient(135deg, #DC2626, #EA580C)" }}>
+                <ExternalLink className="w-3.5 h-3.5" /> Buy on Brand Website
+              </button>
+              <div className="absolute bottom-full left-0 mb-2 w-64 bg-gray-900 text-white text-[10px] rounded-xl px-3 py-2.5 shadow-2xl opacity-0 group-hover/cartbuy:opacity-100 pointer-events-none transition-opacity z-30">
+                <span className="text-amber-400 font-bold">⚠ Heads up!</span> You'll be taken to <strong>{item.brand_name}'s official website</strong> to complete your purchase. Khareedlo is not responsible for the transaction.
+                <div className="absolute top-full left-4 border-4 border-transparent border-t-gray-900" />
+              </div>
+            </div>
           ) : (
             <span className="text-[11px] text-gray-400 italic">No direct link available</span>
           )}
