@@ -32,6 +32,7 @@ function imgSrc(image) {
 }
 
 function ProductCard({ product, onAddToCart, canInteract, trackClick }) {
+  const [redirectWarning, setRedirectWarning] = useState(null);
   const navigate = useNavigate();
   const [justAdded,    setJustAdded]    = useState(false);
   const [imgFailed,    setImgFailed]    = useState(false);
@@ -54,7 +55,7 @@ function ProductCard({ product, onAddToCart, canInteract, trackClick }) {
   const handleBuyNow = (e) => {
     e.stopPropagation();
     if (!canInteract) { setShowLoginTip(true); setTimeout(() => setShowLoginTip(false), 2500); return; }
-    if (product.buy_now_link) window.open(product.buy_now_link, "_blank", "noopener,noreferrer");
+    if (product.buy_now_link) setRedirectWarning({ brand: product.brand_name, link: product.buy_now_link });
   };
 
   return (

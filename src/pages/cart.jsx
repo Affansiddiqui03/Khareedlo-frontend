@@ -7,6 +7,7 @@ import { CartContext } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 import BuyNowModal from "../components/BuyNowModal";
 import { useBuyNowModal } from "../hooks/useBuyNowModal";
+import RedirectWarning from "../components/RedirectWarning";
 import {
   ShoppingCart, Trash2, ExternalLink, ArrowLeft,
   Package, Store, ShoppingBag, Info, Sparkles,
@@ -91,6 +92,7 @@ export default function Cart() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { modalProduct, triggerBuyNow, closeModal } = useBuyNowModal();
+  const [redirectWarning, setRedirectWarning] = useState(null);
 
   if (!user) {
     return (
@@ -112,6 +114,13 @@ export default function Cart() {
   }
 
   const handleBuy = (item) => {
+    // Show redirect warning first
+    setRedirectWarning({ item, brand: item.brand || item.brand_name || "the brand", link: item.buy_now_link });
+  };
+
+  const confirmBuy = () => {
+    const { item } = redirectWarning;
+    setRedirectWarning(null);
     if (user?.id) {
       fetch("https://khareedlo-backend-production.up.railway.app/api/user/track/buy-redirect", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -122,7 +131,6 @@ export default function Cart() {
         body: JSON.stringify({ brand_id: item.brand_id, product_id: item.product_id, action: "BUY_NOW" }),
       }).catch(() => {});
     }
-    // Trigger redirect + modal after 8s
     triggerBuyNow(item, item.buy_now_link);
   };
 
@@ -240,6 +248,7 @@ export default function Cart() {
 
       {/* BuyNow Modal */}
       {modalProduct && <BuyNowModal product={modalProduct} onClose={closeModal} />}
+      {redirectWarning && <RedirectWarning brand={redirectWarning.brand} link={redirectWarning.link} onConfirm={confirmBuy} onCancel={() => setRedirectWarning(null)} />}
     </>
   );
 }

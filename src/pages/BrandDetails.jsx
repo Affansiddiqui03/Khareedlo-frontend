@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { CartContext } from "../contexts/CartContext";
+import RedirectWarning from "../components/RedirectWarning";
 import { brandAssets } from "../data/brandAssets";
 import ProductCard from "../components/ProductCard";
 import RatingPopup from "../components/RatingPopup";
@@ -65,6 +66,7 @@ export default function BrandDetails() {
 
   // Rating
   const [showRating,    setShowRating]    = useState(false);
+  const [redirectWarning, setRedirectWarning] = useState(null);
   const [avgRating,     setAvgRating]     = useState(0);
   const [ratingCount,   setRatingCount]   = useState(0);
   const [alreadyRated,  setAlreadyRated]  = useState(false);
@@ -404,6 +406,15 @@ export default function BrandDetails() {
       <div className="mt-16">
         <Footer />
       </div>
+
+      {redirectWarning && (
+        <RedirectWarning
+          brand={redirectWarning.brand}
+          link={redirectWarning.link}
+          onConfirm={() => { window.open(redirectWarning.link, "_blank", "noopener,noreferrer"); setRedirectWarning(null); }}
+          onCancel={() => setRedirectWarning(null)}
+        />
+      )}
     </div>
   );
 }

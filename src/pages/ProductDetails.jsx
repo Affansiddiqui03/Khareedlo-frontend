@@ -7,6 +7,7 @@ import { CartContext } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 import RatingPopup from "../components/RatingPopup";
 import BuyNowModal from "../components/BuyNowModal";
+import RedirectWarning from "../components/RedirectWarning";
 import { useBuyNowModal } from "../hooks/useBuyNowModal";
 import {
   Star, ShoppingCart, Heart, CheckCircle,
@@ -70,6 +71,7 @@ export default function ProductDetail() {
   const { addToCart } = useContext(CartContext);
   const { user }  = useAuth();
   const { modalProduct, triggerBuyNow, closeModal } = useBuyNowModal();
+  const [redirectWarning, setRedirectWarning] = React.useState(null);
 
   const [product,      setProduct]      = useState(null);
   const [comparePool,  setComparePool]  = useState([]);
@@ -131,11 +133,20 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!user) { setShowLogin(true); return; }
-    fetch(`${IMG_BASE}/api/user/track/buy-redirect`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customer_id: user.id, product_id: product.id, product_name: product.title || "", brand_name: product.brand || "" }) }).catch(() => {});
-    fetch(`${IMG_BASE}/api/pos/track`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ brand_id: product.brand_id, product_id: product.id, action: "BUY_NOW" }) }).catch(() => {});
     const link = product.buy_now_link || product.brand_website;
+    if (!link) return;
+    // Show redirect warning first
+    setRedirectWarning({ brand: product.brand || "the brand", link });
+  };
 
-    // Show rating popup if not yet rated
+  const confirmBuyNow = () => {
+    const link = redirectWarning?.link;
+    const brand = redirectWarning?.brand;
+    setRedirectWarning(null);
+    // Track
+    fetch(`${IMG_BASE}/api/user/track/buy-redirect`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customer_id: user.id, product_id: product.id, product_name: product.title || "", brand_name: brand || "" }) }).catch(() => {});
+    fetch(`${IMG_BASE}/api/pos/track`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ brand_id: product.brand_id, product_id: product.id, action: "BUY_NOW" }) }).catch(() => {});
+    // Show rating popup if not yet rated, then redirect
     if (ratingChecked && !alreadyRated) {
       setShowRating(true);
       setTimeout(() => triggerBuyNow(product, link), 2000);
@@ -383,6 +394,7 @@ export default function ProductDetail() {
 
       {/* BuyNow Modal — appears 8s after redirect */}
       {modalProduct && <BuyNowModal product={modalProduct} onClose={closeModal} onOrderSaved={(data) => console.log("Order saved:", data)} />}
+      {redirectWarning && <RedirectWarning brand={redirectWarning.brand} link={redirectWarning.link} onConfirm={confirmBuyNow} onCancel={() => setRedirectWarning(null)} />}
     </div>
   );
 }
