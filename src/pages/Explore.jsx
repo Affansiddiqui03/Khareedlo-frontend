@@ -403,7 +403,9 @@ export default function Explore() {
 
                 {filteredOutlets.map(o => {
                   const color     = brandColor(o.brandName);
-                  const isNearest = nearestIds.has(o.id);
+                  const _nc = window.__nearestCoords || [];
+                  const isNearest = nearestIds.has(o.id) ||
+                    _nc.some(n => Math.abs(n.lat - o.coords.lat) < 0.001 && Math.abs(n.lng - o.coords.lng) < 0.001);
                   return (
                     <Marker key={o.id} position={[o.coords.lat, o.coords.lng]}
                       icon={makeBrandIcon(color, isNearest)}
@@ -470,7 +472,9 @@ export default function Explore() {
                   </div>
                 ) : filteredOutlets.map(o => {
                   const color     = brandColor(o.brandName);
-                  const isNearest = nearestIds.has(o.id);
+                  const _nc = window.__nearestCoords || [];
+                  const isNearest = nearestIds.has(o.id) ||
+                    _nc.some(n => Math.abs(n.lat - o.coords.lat) < 0.001 && Math.abs(n.lng - o.coords.lng) < 0.001);
                   return (
                     <div key={o.id} onClick={() => setSelected(o === selected ? null : o)}
                       className={`bg-white rounded-2xl border p-4 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 ${

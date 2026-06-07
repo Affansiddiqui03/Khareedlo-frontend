@@ -8,6 +8,8 @@ import {
   FileText, User, LogOut, Menu, ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { MapPin } from "lucide-react";
+
 
 const BRAND_THEMES = {
   "J. By Junaid Jamshed": { accent: "#7C3A1E", accentLight: "#B45309", bg: "from-[#7C3A1E]" },
@@ -36,6 +38,8 @@ export default function BrandLayout() {
     { to: "/brand/orders",    label: "Platform Orders",  icon: ShoppingBag                },
     { to: "/brand/report",    label: "Summary Report",   icon: FileText                   },
     { to: "/brand/profile",   label: "Profile",          icon: User                       },
+    { to: "/brand/outlets", label: "Outlets",        icon: MapPin  },
+
   ];
 
   return (
