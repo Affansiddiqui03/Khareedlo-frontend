@@ -43,7 +43,7 @@ import Products       from "./pages/brand/Products";
 import PlatformOrders from "./pages/brand/PlatformOrders";  // NEW
 import SummaryReport  from "./pages/brand/SummaryReport";
 import Profile        from "./pages/brand/Profile";
-import BrandOutlets from "./pages/brand/Outlet";
+import BrandOutlets from "./pages/brand/Outlet.jsx";
 
 
 // Providers
