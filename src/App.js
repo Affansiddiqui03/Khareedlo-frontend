@@ -43,6 +43,8 @@ import Products       from "./pages/brand/Products";
 import PlatformOrders from "./pages/brand/PlatformOrders";  // NEW
 import SummaryReport  from "./pages/brand/SummaryReport";
 import Profile        from "./pages/brand/Profile";
+import BrandOutlets from "./pages/brand/Outlet";
+
 
 // Providers
 import { AuthProvider }     from "./contexts/AuthContext";
@@ -112,6 +114,8 @@ export default function App() {
                 <Route path="orders"      element={<PlatformOrders />} />
                 <Route path="report"      element={<SummaryReport />} />
                 <Route path="profile"     element={<Profile />} />
+                <Route path="outlets" element={<BrandOutlets />} />
+
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />
