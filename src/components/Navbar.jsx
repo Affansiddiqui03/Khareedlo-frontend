@@ -269,7 +269,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop user dropdown */}
-            {user && user.role !== "brand" ? (
+            {user ? (
               <div className="hidden lg:block relative" ref={dropdownRef}>
                 <button onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-1 text-gray-300 hover:text-white">
@@ -281,10 +281,12 @@ export default function Navbar() {
                   <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg p-2">
                     <Link to={user.role === "admin" ? "/admin" : user.role === "brand" ? "/brand" : "/dashboard"}
                       className="block px-3 py-2 hover:bg-gray-100 rounded text-sm">Dashboard</Link>
-                    <Link to="/cart" className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 rounded text-sm">
-                      <span>My Cart</span>
-                      {totalItems > 0 && <span className="text-xs font-bold text-red-600">{totalItems}</span>}
-                    </Link>
+                    {user.role !== "admin" && user.role !== "brand" && (
+                      <Link to="/cart" className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 rounded text-sm">
+                        <span>My Cart</span>
+                        {totalItems > 0 && <span className="text-xs font-bold text-red-600">{totalItems}</span>}
+                      </Link>
+                    )}
                     <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 rounded text-sm">
                       Logout
                     </button>

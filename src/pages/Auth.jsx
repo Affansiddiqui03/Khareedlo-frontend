@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 const API = "https://khareedlo-backend-production.up.railway.app/api";
+const ADMIN_EMAIL = "khareedlo@gmail.com";
 const VALID_TLDS = new Set([
   "com","net","org","edu","gov","io","co","pk","uk","us","ca","au",
   "de","fr","in","ae","sa","bd","np","lk","mv","af","iq","store",
@@ -193,6 +194,7 @@ export default function Auth() {
     } else {
       if (!cName.trim()) e2.cName = "Full name is required";
       if (!validEmail(cEmail)) e2.cEmail = "Enter a valid email (e.g. name@example.com)";
+      if (cEmail.trim().toLowerCase() === ADMIN_EMAIL) e2.cEmail = "This email address is not available.";
       if (!cPass || cPass.length < 6) e2.cPass = "Password must be at least 6 characters";
       if (cPass !== cConfirm) e2.cConfirm = "Passwords do not match";
       if (Object.keys(e2).length) { setErrs(e2); return; }
@@ -225,6 +227,7 @@ export default function Auth() {
     } else {
       if (!bName.trim()) e2.bName = "Brand name is required";
       if (!validEmail(bEmail)) e2.bEmail = "Enter a valid email (e.g. brand@example.com)";
+      if (bEmail.trim().toLowerCase() === ADMIN_EMAIL) e2.bEmail = "This email address is not available.";
       if (!bPass || bPass.length < 6) e2.bPass = "Password must be at least 6 characters";
       if (bPass !== bConfirm) e2.bConfirm = "Passwords do not match";
       if (Object.keys(e2).length) { setErrs(e2); return; }
