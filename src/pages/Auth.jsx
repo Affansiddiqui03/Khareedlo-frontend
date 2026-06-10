@@ -120,6 +120,7 @@ export default function Auth() {
   const [mode, setMode]       = useState("login");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg]         = useState(null);
+  const [brandRegistered, setBrandRegistered] = useState(false);
 
   const [cName, setCName]       = useState("");
   const [cEmail, setCEmail]     = useState("");
@@ -236,7 +237,7 @@ export default function Auth() {
         const res = await fetch(`${API}/brand/register`, { method: "POST", body: fd });
         const data = await res.json();
         if (!res.ok) { setMsg(data.message || "Registration failed"); return; }
-        setMsg("Brand registered! Waiting for admin approval."); switchMode("login");
+        setBrandRegistered(true);
       } catch { setMsg("Server error. Try again."); } finally { setLoading(false); }
     }
   };
@@ -276,6 +277,40 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#f7f7ff] to-[#ffb48f] px-4 py-8 sm:py-12">
+
+      {/* ── Brand Registration Success Popup ── */}
+      {brandRegistered && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div style={{ background: "linear-gradient(135deg, #f97316, #ef4444)" }} className="h-2 w-full" />
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg"
+                style={{ background: "linear-gradient(135deg, #f97316, #ef4444)" }}>
+                <CheckCircle className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Registration Successful!</h2>
+              <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                Your brand has been registered on <strong className="text-orange-500">Khareedlo</strong>.<br />
+                Please wait for admin approval. You will receive an email once your account is approved.
+              </p>
+              <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-orange-700 text-sm font-semibold mb-1">⏳ What happens next?</p>
+                <ul className="text-orange-600 text-xs space-y-1 pl-2">
+                  <li>• Our admin team will review your registration</li>
+                  <li>• You will receive an approval email</li>
+                  <li>• Once approved, you can log in to your Brand Dashboard</li>
+                </ul>
+              </div>
+              <button
+                onClick={() => { setBrandRegistered(false); switchTab("brand"); }}
+                className="w-full py-3 rounded-2xl text-white font-bold text-sm transition-all hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #f97316, #ef4444)" }}>
+                Go to Brand Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Logo */}
       <Link to="/" className="mb-5 sm:mb-6">
