@@ -148,7 +148,7 @@ export default function Auth() {
   const customerLoginReady  = validEmail(cEmail) && cPass.length > 0;
   const customerRegReady    = cName.trim() && validEmail(cEmail) && cPass.length >= 6 && cPass === cConfirm;
   const brandLoginReady     = validEmail(bEmail) && bPass.length > 0;
-  const brandRegReady       = bName.trim() && validEmail(bEmail) && bPass.length >= 6 && bPass === bConfirm;
+  const brandRegReady       = bName.trim() && validEmail(bEmail) && bPass.length >= 6 && bPass === bConfirm && bContact.trim().length >= 10 && bLogo !== null;
   const adminLoginReady     = validEmail(aEmail) && aPass.length > 0;
   const forgotReady         = validEmail(fpEmail) && fpNew.length >= 6 && fpNew === fpConfirm;
 
@@ -448,16 +448,17 @@ export default function Auth() {
                     value={bConfirm} onChange={e => setBConfirm(e.target.value)} error={errs.bConfirm} />
                   {/* Contact + Website side by side on larger screens */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <Field icon={Phone} placeholder="Contact (+92...)"
-                      value={bContact} onChange={e => setBContact(e.target.value)} />
+                    <Field icon={Phone} placeholder="Contact +92XXXXXXXXXX *"
+                      value={bContact} onChange={e => setBContact(e.target.value)}
+                      error={bContact && bContact.trim().length < 10 ? "Enter valid contact number" : null} />
                     <Field icon={Globe} placeholder="Website (optional)"
                       value={bWebsite} onChange={e => setBWebsite(e.target.value)} />
                   </div>
                   {/* Logo Upload */}
-                  <div className="border border-dashed border-gray-200 rounded-xl p-2.5 sm:p-3 flex items-center gap-3 bg-gray-50">
+                  <div className={`border border-dashed rounded-xl p-2.5 sm:p-3 flex items-center gap-3 bg-gray-50 ${!bLogo ? "border-orange-300" : "border-gray-200"}`}>
                     <label className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-gray-500 hover:text-orange-500 transition flex-1 min-w-0">
                       <Upload size={14} className="flex-shrink-0" />
-                      <span className="truncate">{bLogo ? bLogo.name : "Upload Brand Logo"}</span>
+                      <span className="truncate">{bLogo ? bLogo.name : "Upload Brand Logo *"}</span>
                       <input type="file" accept="image/*" className="hidden" onChange={handleLogo} />
                     </label>
                     {bLogoPreview && (
