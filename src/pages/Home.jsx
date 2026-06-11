@@ -86,7 +86,7 @@ export default function Home() {
 
   const handleOutletSearch = () => {
     if (!query.trim()) return;
-    navigate(`/explore?brand=${encodeURIComponent(query)}`);
+    navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
   };
 
   useEffect(() => {
@@ -228,19 +228,6 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              {platformBrands.map(b => (
-                <Link key={b} to={`/explore?brand=${encodeURIComponent(b)}`}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                  style={{background: BRAND_COLOR[b] || "#DC2626"}}>
-                  {b}
-                  <span className="bg-white/25 rounded-full text-[10px] px-2 py-0.5 font-extrabold">
-                    {outlets.filter(o => o.brandName === b).length} outlets
-                  </span>
-                </Link>
-              ))}
-            </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-12">
               {cityOutletCounts.map(c => (
                 <Link key={c.city} to="/explore"
@@ -281,10 +268,8 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-2 md:mt-0">
                   {[
-                    { num: outlets.length,                                   label: "Total Outlets",  icon: "🏪" },
-                    { num: platformBrands.length,                            label: "Partner Brands", icon: "🏷️" },
                     { num: cityOutletCounts.filter(c => c.count > 0).length, label: "Cities Covered", icon: "🏙️" },
-                    { num: "Free",                                            label: "Entry Always",   icon: "✅" },
+                    { num: "Free",                                             label: "Entry Always",   icon: "✅" },
                   ].map(s => (
                     <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center">
                       <p className="text-2xl sm:text-3xl mb-0.5 sm:mb-1">{s.icon}</p>

@@ -105,10 +105,10 @@ export default function Explore() {
   const [apiOutlets, setApiOutlets] = useState([]);
 
   // Filters
-  const [brand,     setBrand]     = useState(searchParams.get("brand") || "all");
+  const [brand,     setBrand]     = useState("all");
   const [city,      setCity]      = useState("all");
   const [radiusKm,  setRadiusKm]  = useState("any");
-  const [query,     setQuery]     = useState("");
+  const [query,     setQuery]     = useState(searchParams.get("q") || "");
 
   // Location
   const [userLoc,    setUserLoc]    = useState(null);
@@ -133,7 +133,15 @@ export default function Explore() {
 
   useEffect(() => {
     const b = searchParams.get("brand");
-    if (b) setBrand(b);
+    const q = searchParams.get("q");
+    if (b) {
+      // brand param: try exact match first, else find case-insensitive match
+      setBrand(b);
+    }
+    if (q) {
+      setQuery(q);
+      setBrand("all");
+    }
   }, [searchParams]);
 
   // Merge static + API
@@ -154,7 +162,7 @@ export default function Explore() {
 
   const filteredOutlets = useMemo(() => {
     let data = [...allOutlets];
-    if (brand !== "all") data = data.filter(o => o.brandName === brand);
+    if (brand !== "all") data = data.filter(o => o.brandName.toLowerCase() === brand.toLowerCase());
     if (city  !== "all") data = data.filter(o => o.city === city);
     if (query.trim()) {
       const q = query.toLowerCase();
