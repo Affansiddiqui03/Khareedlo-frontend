@@ -18,9 +18,9 @@ import Footer from "../components/Footer";
 import outlets from "../data/outlets";
 
 import banner1 from "../assets/banner1.webp";
-import banner2 from "../assets/banner2.webp";
+import banner2 from "../assets/zellbury.webp";
 import banner3 from "../assets/banner3.jpg";
-import banner4 from "../assets/banner4.png";
+import banner4 from "../assets/limelight.webp";
 
 const BRAND_COLOR = {
   "J. by Junaid Jamshed": "#7C3A1E",

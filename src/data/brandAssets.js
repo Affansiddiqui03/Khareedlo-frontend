@@ -1,7 +1,7 @@
 import jBanner from "../assets/banner1.webp";
-import zellburyBanner from "../assets/banner2.webp";
+import zellburyBanner from "../assets/zellbury.webp";
 import alkaramBanner from "../assets/banner3.jpg";
-import limelightBanner from "../assets/banner4.png";
+import limelightBanner from "../assets/limelight.webp";
 
 import jLogo from "../assets/brand2.png";
 import zellburyLogo from "../assets/brand4.jpeg";
