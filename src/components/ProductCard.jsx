@@ -50,6 +50,19 @@ export default function ProductCard({ product, onAddToCart, disableAdd }) {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
 
+    // Track ADD_TO_CART for trending score (works for all users including guests)
+    if (product.brand_id && product.id) {
+      fetch("https://khareedlo-backend-production.up.railway.app/api/pos/track", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brand_id:   product.brand_id,
+          product_id: product.id,
+          action:     "ADD_TO_CART",
+        }),
+      }).catch(() => {});
+    }
+
     // After adding to cart, show rating popup if not yet rated (and user is logged in)
     if (user?.id && ratingChecked && !alreadyRated) {
       setTimeout(() => setShowRating(true), 600);
