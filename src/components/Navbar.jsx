@@ -97,7 +97,7 @@ export default function Navbar() {
   <img
     src={BrandLogo}
     alt="Khareedlo"
-    className="h-24 w-auto object-contain"
+    className="h-32 w-auto object-contain"
   />
 </div>
           <button
@@ -238,7 +238,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={BrandLogo} alt="Khareedlo" className="h-20 sm:h-32 w-auto object-contain" />
+            <img src={BrandLogo} alt="Khareedlo" className="h-24 sm:h-[8.5rem] w-auto object-contain" />
           </Link>
 
           {/* Desktop Links */}
