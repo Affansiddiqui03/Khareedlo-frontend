@@ -215,7 +215,7 @@ export default function Home() {
             <div className="text-center mb-8 sm:mb-16">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-red-50 border border-red-100 text-red-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse" />
-                {outlets.length} outlets across Pakistan
+                Outlets across Pakistan
               </div>
               <h2 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
                 Find Your Nearest<br />
