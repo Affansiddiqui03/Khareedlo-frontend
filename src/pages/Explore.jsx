@@ -1,8 +1,9 @@
 // src/pages/Explore.jsx
 // Static 4 brands (outlets.js) + dynamic new brands from DB API
-// No Find Nearest button — Use My Location sorts by distance
+// Selected outlet → map flies to it + shows large pulsing marker
+// Distance filter fully functional when location active
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
   MapContainer, TileLayer, Marker, Popup,
   useMap, useMapEvent, Circle,
@@ -50,6 +51,7 @@ function brandColor(name) {
   return colorCache[name];
 }
 
+// Normal marker (small)
 function makeBrandIcon(color) {
   const svg = encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 44">
@@ -63,17 +65,65 @@ function makeBrandIcon(color) {
   });
 }
 
+// Selected/highlighted marker (large + animated pulse ring)
+function makeSelectedIcon(color) {
+  const svg = encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 56">
+      <path d="M20 0C8.954 0 0 8.954 0 20c0 15 20 36 20 36s20-21 20-36C40 8.954 31.046 0 20 0z" fill="${color}"/>
+      <circle cx="20" cy="20" r="9" fill="white" opacity="0.98"/>
+      <circle cx="20" cy="20" r="5" fill="${color}" opacity="0.8"/>
+    </svg>
+  `);
+  return L.divIcon({
+    html: `
+      <div style="position:relative;width:50px;height:62px;">
+        <div style="
+          position:absolute;top:-10px;left:-10px;
+          width:70px;height:70px;
+          border-radius:50%;
+          background:${color};
+          opacity:0.25;
+          animation:pulse-ring 1.4s ease-out infinite;
+        "></div>
+        <img src="data:image/svg+xml,${svg}" width="40" height="56" style="
+          position:absolute;top:0;left:5px;
+          filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+        "/>
+      </div>
+      <style>
+        @keyframes pulse-ring {
+          0%   { transform: scale(0.6); opacity: 0.4; }
+          70%  { transform: scale(1.3); opacity: 0; }
+          100% { transform: scale(1.3); opacity: 0; }
+        }
+      </style>
+    `,
+    iconSize: [50, 62], iconAnchor: [25, 56], className: "",
+  });
+}
+
 const userIcon = L.divIcon({
   html: `<div style="width:16px;height:16px;background:#3B82F6;border:3px solid white;border-radius:50%;box-shadow:0 0 0 5px rgba(59,130,246,0.25),0 2px 8px rgba(0,0,0,0.2)"></div>`,
   iconSize: [16, 16], iconAnchor: [8, 8], className: "",
 });
 
+// FlyTo map when center changes
 function FlyTo({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) map.flyTo([center.lat, center.lng], zoom || 15, { duration: 1.2, easeLinearity: 0.35 });
+  // eslint-disable-next-line
+  }, [center?.lat, center?.lng]);
+  return null;
+}
+
+// Fly to user location (separate so it doesn't fire when outlet selected)
+function FlyToUser({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
     if (center) map.flyTo([center.lat, center.lng], zoom || 13, { duration: 1.4, easeLinearity: 0.35 });
   // eslint-disable-next-line
-  }, [center]);
+  }, [center?.lat, center?.lng]);
   return null;
 }
 
@@ -82,7 +132,20 @@ function MapClickHandler({ enabled, onPick }) {
   return null;
 }
 
-// Normalize API outlet to same shape as static outlets
+// Auto-open popup for selected marker
+function SelectedPopupOpener({ selected, markerRefs }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!selected) return;
+    const marker = markerRefs.current[selected.id];
+    if (marker) {
+      setTimeout(() => marker.openPopup(), 400); // wait for flyTo
+    }
+  // eslint-disable-next-line
+  }, [selected?.id]);
+  return null;
+}
+
 const STATIC_BRAND_NAMES = new Set(["J. by Junaid Jamshed","Zellbury","Alkaram Studio","Limelight"]);
 
 function normalizeApiOutlet(o) {
@@ -101,24 +164,22 @@ function normalizeApiOutlet(o) {
 export default function Explore() {
   const [searchParams] = useSearchParams();
 
-  // API outlets (new brands only)
   const [apiOutlets, setApiOutlets] = useState([]);
-
-  // Filters
   const [brand,     setBrand]     = useState("all");
   const [city,      setCity]      = useState("all");
   const [radiusKm,  setRadiusKm]  = useState("any");
   const [query,     setQuery]     = useState(searchParams.get("q") || "");
-
-  // Location
   const [userLoc,    setUserLoc]    = useState(null);
+  const [flyTarget,  setFlyTarget]  = useState(null); // for user location fly
   const [locLoading, setLocLoading] = useState(false);
   const [locError,   setLocError]   = useState("");
   const [pickMode,   setPickMode]   = useState(false);
+  const [selected,   setSelected]   = useState(null);
+  const [flyToOutlet, setFlyToOutlet] = useState(null); // for outlet fly
 
-  const [selected, setSelected] = useState(null);
+  // ref map of outlet id -> leaflet marker instance
+  const markerRefs = useRef({});
 
-  // Fetch new brands' outlets from API
   useEffect(() => {
     fetch(`${BASE}/api/outlets`)
       .then(r => r.ok ? r.json() : [])
@@ -134,19 +195,11 @@ export default function Explore() {
   useEffect(() => {
     const b = searchParams.get("brand");
     const q = searchParams.get("q");
-    if (b) {
-      // brand param: try exact match first, else find case-insensitive match
-      setBrand(b);
-    }
-    if (q) {
-      setQuery(q);
-      setBrand("all");
-    }
+    if (b) setBrand(b);
+    if (q) { setQuery(q); setBrand("all"); }
   }, [searchParams]);
 
-  // Merge static + API
   const allOutlets = useMemo(() => [...staticOutlets, ...apiOutlets], [apiOutlets]);
-
   const brands = useMemo(() => [...new Set(allOutlets.map(o => o.brandName))].sort(), [allOutlets]);
   const cities  = useMemo(() => [...new Set(allOutlets.map(o => o.city))].sort(),     [allOutlets]);
 
@@ -154,11 +207,28 @@ export default function Explore() {
     if (!navigator.geolocation) { setLocError("Geolocation not supported."); return; }
     setLocLoading(true); setLocError("");
     navigator.geolocation.getCurrentPosition(
-      pos => { setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocLoading(false); },
+      pos => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLoc(loc);
+        setFlyTarget(loc);
+        setLocLoading(false);
+      },
       ()  => { setLocError("Location access denied. Allow location in browser settings."); setLocLoading(false); },
       { timeout: 12000, enableHighAccuracy: true }
     );
   }, []);
+
+  // When outlet is clicked from sidebar → fly map to it + show large marker
+  const handleOutletClick = useCallback((o) => {
+    const isAlreadySelected = selected?.id === o.id;
+    if (isAlreadySelected) {
+      setSelected(null);
+      setFlyToOutlet(null);
+    } else {
+      setSelected(o);
+      setFlyToOutlet({ lat: o.coords.lat, lng: o.coords.lng });
+    }
+  }, [selected]);
 
   const filteredOutlets = useMemo(() => {
     let data = [...allOutlets];
@@ -308,8 +378,17 @@ export default function Explore() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
-                <FlyTo center={userLoc} zoom={12} />
-                <MapClickHandler enabled={pickMode} onPick={loc => { setUserLoc(loc); setPickMode(false); }} />
+                {/* Fly to user location when they click Use My Location */}
+                <FlyToUser center={flyTarget} zoom={13} />
+                {/* Fly to selected outlet */}
+                {flyToOutlet && <FlyTo center={flyToOutlet} zoom={16} />}
+                <MapClickHandler enabled={pickMode} onPick={loc => {
+                  setUserLoc(loc);
+                  setFlyTarget(loc);
+                  setPickMode(false);
+                }} />
+                {/* Auto-open popup for selected */}
+                <SelectedPopupOpener selected={selected} markerRefs={markerRefs} />
 
                 {userLoc && (
                   <>
@@ -323,28 +402,40 @@ export default function Explore() {
                   </>
                 )}
 
-                {filteredOutlets.map(o => (
-                  <Marker key={o.id} position={[o.coords.lat, o.coords.lng]}
-                    icon={makeBrandIcon(brandColor(o.brandName))}
-                    eventHandlers={{ click: () => setSelected(o) }}>
-                    <Popup maxWidth={260}>
-                      <div style={{ fontFamily: "Sora, sans-serif", padding: "2px 0" }}>
-                        <p style={{ fontSize: 13, fontWeight: 800, marginBottom: 2 }}>{o.outletName}</p>
-                        <p style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>{o.address}</p>
-                        {o.distance !== undefined && (
-                          <p style={{ fontSize: 11, fontWeight: 700, color: "#3B82F6", marginBottom: 2 }}>📍 {fmtKm(o.distance)} away</p>
-                        )}
-                        <p style={{ fontSize: 11, color: "#6B7280" }}>🕐 {o.hours}</p>
-                        {o.phone && <p style={{ fontSize: 11, color: "#6B7280" }}>📞 {o.phone}</p>}
-                        <a href={`https://www.google.com/maps/dir/?api=1&destination=${o.coords.lat},${o.coords.lng}`}
-                          target="_blank" rel="noreferrer"
-                          style={{ display: "inline-block", marginTop: 8, fontSize: 11, fontWeight: 700, color: "#DC2626" }}>
-                          Get Directions →
-                        </a>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+                {filteredOutlets.map(o => {
+                  const isSelected = selected?.id === o.id;
+                  return (
+                    <Marker
+                      key={o.id}
+                      position={[o.coords.lat, o.coords.lng]}
+                      icon={isSelected ? makeSelectedIcon(brandColor(o.brandName)) : makeBrandIcon(brandColor(o.brandName))}
+                      zIndexOffset={isSelected ? 1000 : 0}
+                      ref={ref => { if (ref) markerRefs.current[o.id] = ref; }}
+                      eventHandlers={{ click: () => handleOutletClick(o) }}
+                    >
+                      <Popup maxWidth={280}>
+                        <div style={{ fontFamily: "Sora, sans-serif", padding: "4px 0" }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+                            <div style={{ width:10, height:10, borderRadius:"50%", background:brandColor(o.brandName), flexShrink:0 }}/>
+                            <span style={{ fontSize:10, fontWeight:900, textTransform:"uppercase", letterSpacing:1, color:brandColor(o.brandName) }}>{o.brandName}</span>
+                          </div>
+                          <p style={{ fontSize: 14, fontWeight: 800, marginBottom: 3, color:"#111" }}>{o.outletName}</p>
+                          <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 5 }}>{o.address}</p>
+                          {o.distance !== undefined && (
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#3B82F6", marginBottom: 3 }}>📍 {fmtKm(o.distance)} away</p>
+                          )}
+                          <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>🕐 {o.hours}</p>
+                          {o.phone && <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>📞 {o.phone}</p>}
+                          <a href={`https://www.google.com/maps/dir/?api=1&destination=${o.coords.lat},${o.coords.lng}`}
+                            target="_blank" rel="noreferrer"
+                            style={{ display:"inline-block", padding:"6px 12px", background:brandColor(o.brandName), color:"white", borderRadius:8, fontSize:12, fontWeight:700, textDecoration:"none" }}>
+                            🗺 Get Directions
+                          </a>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
               </MapContainer>
 
               <div className="absolute top-3 left-3 z-[400] bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl shadow-md">
@@ -355,6 +446,15 @@ export default function Explore() {
               {pickMode && (
                 <div className="absolute top-3 right-3 z-[400] bg-blue-600 text-white text-[11px] font-bold px-3 py-2 rounded-xl shadow-md animate-pulse">
                   Click map to set location
+                </div>
+              )}
+              {selected && (
+                <div className="absolute bottom-3 left-3 z-[400] bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl shadow-md flex items-center gap-2 max-w-[240px]">
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: brandColor(selected.brandName) }}/>
+                  <span className="text-xs font-bold text-gray-800 truncate">{selected.outletName}</span>
+                  <button onClick={() => { setSelected(null); setFlyToOutlet(null); }} className="ml-auto flex-shrink-0">
+                    <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-700" />
+                  </button>
                 </div>
               )}
             </div>
@@ -381,11 +481,11 @@ export default function Explore() {
                     <p className="text-gray-400 text-xs mt-1">Try changing brand, city, or radius</p>
                   </div>
                 ) : filteredOutlets.map(o => (
-                  <div key={o.id} onClick={() => setSelected(o === selected ? null : o)}
+                  <div key={o.id} onClick={() => handleOutletClick(o)}
                     className={`bg-white rounded-2xl border p-4 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 ${
                       selected?.id === o.id ? "ring-2 shadow-md" : "border-gray-100"
                     }`}
-                    style={selected?.id === o.id ? { borderColor: brandColor(o.brandName) } : {}}>
+                    style={selected?.id === o.id ? { borderColor: brandColor(o.brandName), ringColor: brandColor(o.brandName) } : {}}>
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: brandColor(o.brandName) }} />
@@ -404,13 +504,18 @@ export default function Explore() {
                       <p className="text-[11px] text-gray-500 flex items-center gap-1.5"><MapPin className="w-3 h-3 flex-shrink-0" /> {o.address}</p>
                       <p className="text-[11px] text-gray-400 flex items-center gap-1.5"><Clock className="w-3 h-3 flex-shrink-0" /> {o.hours}</p>
                     </div>
+                    {selected?.id === o.id && (
+                      <p className="mt-2 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                        <MapPin className="w-3 h-3"/> Shown on map ↑
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Selected outlet detail */}
+          {/* Selected outlet detail panel */}
           {selected && (
             <div className="mt-5 bg-white rounded-3xl border border-gray-100 shadow-lg overflow-hidden">
               <div className="h-2" style={{ background: brandColor(selected.brandName) }} />
@@ -429,7 +534,7 @@ export default function Explore() {
                       <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {selected.address}</p>
                     </div>
                   </div>
-                  <button onClick={() => setSelected(null)}
+                  <button onClick={() => { setSelected(null); setFlyToOutlet(null); }}
                     className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center flex-shrink-0">
                     <X className="w-4 h-4 text-gray-500" />
                   </button>
@@ -455,7 +560,7 @@ export default function Explore() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${selected.coords.lat},${selected.coords.lng}`}
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selected.outletName + ' ' + selected.address)}`}
                     target="_blank" rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-white text-sm font-extrabold transition-all hover:shadow-lg hover:-translate-y-0.5"
                     style={{ background: brandColor(selected.brandName) }}>
