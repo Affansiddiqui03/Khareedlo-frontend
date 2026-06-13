@@ -1,5 +1,5 @@
 // src/pages/Explore.jsx
-// Static 4 brands (outlets.js) + dynamic new brands from DB API
+// 100% API-driven — all outlets come from MySQL DB via /api/outlets
 // Selected outlet → map flies to it + shows large pulsing marker
 // Distance filter fully functional when location active
 
@@ -9,7 +9,6 @@ import {
   useMap, useMapEvent, Circle,
 } from "react-leaflet";
 import L from "leaflet";
-import staticOutlets from "../data/outlets";
 import { haversineKm, fmtKm } from "../utils/geo";
 import { useSearchParams, Link } from "react-router-dom";
 import {
@@ -146,11 +145,9 @@ function SelectedPopupOpener({ selected, markerRefs }) {
   return null;
 }
 
-const STATIC_BRAND_NAMES = new Set(["J. by Junaid Jamshed","Zellbury","Alkaram Studio","Limelight"]);
-
 function normalizeApiOutlet(o) {
   return {
-    id:         `api-${o.outlet_id}`,
+    id:         `db-${o.outlet_id}`,
     brandName:  o.brand_name,
     outletName: o.outlet_name,
     address:    o.address,
@@ -164,7 +161,8 @@ function normalizeApiOutlet(o) {
 export default function Explore() {
   const [searchParams] = useSearchParams();
 
-  const [apiOutlets, setApiOutlets] = useState([]);
+  const [allOutlets, setAllOutlets] = useState([]);
+  const [loading,    setLoading]    = useState(true);
   const [brand,     setBrand]     = useState("all");
   const [city,      setCity]      = useState("all");
   const [radiusKm,  setRadiusKm]  = useState("any");
@@ -180,16 +178,17 @@ export default function Explore() {
   // ref map of outlet id -> leaflet marker instance
   const markerRefs = useRef({});
 
+  // Fetch ALL outlets from DB (single source of truth)
   useEffect(() => {
+    setLoading(true);
     fetch(`${BASE}/api/outlets`)
       .then(r => r.ok ? r.json() : [])
       .then(data => {
-        const newOnly = Array.isArray(data)
-          ? data.filter(o => !STATIC_BRAND_NAMES.has(o.brand_name)).map(normalizeApiOutlet)
-          : [];
-        setApiOutlets(newOnly);
+        const normalized = Array.isArray(data) ? data.map(normalizeApiOutlet) : [];
+        setAllOutlets(normalized);
+        setLoading(false);
       })
-      .catch(() => setApiOutlets([]));
+      .catch(() => { setAllOutlets([]); setLoading(false); });
   }, []);
 
   useEffect(() => {
@@ -199,7 +198,6 @@ export default function Explore() {
     if (q) { setQuery(q); setBrand("all"); }
   }, [searchParams]);
 
-  const allOutlets = useMemo(() => [...staticOutlets, ...apiOutlets], [apiOutlets]);
   const brands = useMemo(() => [...new Set(allOutlets.map(o => o.brandName))].sort(), [allOutlets]);
   const cities  = useMemo(() => [...new Set(allOutlets.map(o => o.city))].sort(),     [allOutlets]);
 
@@ -278,7 +276,7 @@ export default function Explore() {
             <div>
               <h1 className="text-xl font-extrabold text-gray-900">Explore Brand Outlets</h1>
               <p className="text-xs text-gray-400 mt-0.5">
-                Find stores near you • {allOutlets.length} outlets across Pakistan
+                Find stores near you • {loading ? "Loading outlets..." : `${allOutlets.length} outlets across Pakistan`}
               </p>
             </div>
           </div>
