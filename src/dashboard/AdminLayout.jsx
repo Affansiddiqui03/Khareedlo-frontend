@@ -8,6 +8,19 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import KhareedloLogo from "../assets/khareedlo.png";
+import {
+  LayoutDashboard,
+  Store,
+  Box,
+  Users,
+  ShieldCheck,
+  LogOut,
+  Bell,
+  Menu,
+  X,
+  MessageSquare,
+  RefreshCw,
+} from "lucide-react";
 
 export default function AdminLayout({ children }) {
   const { user, logout, authLoading } = useAuth();
@@ -34,14 +47,30 @@ export default function AdminLayout({ children }) {
     return () => clearInterval(iv);
   }, [user]);
 
-  const NAV = [
-    { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
-    { to: "/admin/brands", label: "Brands", icon: Store },
-    { to: "/admin/products", label: "Live Products", icon: Box },
-    { to: "/admin/approvals", label: "Approvals", icon: ShieldCheck },
-    { to: "/admin/customers", label: "Customers", icon: Users },
-    { to: "/admin/messages", label: "Messages", icon: MessageSquare, badge: unreadMsgs },
-  ];
+const NAV = [
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
+
+  { to: "/admin/brands", label: "Brands", icon: Store },
+
+  { to: "/admin/products", label: "Live Products", icon: Box },
+
+  {
+    to: "/admin/sync",
+    label: "Product Sync",
+    icon: RefreshCw,
+  },
+
+  { to: "/admin/approvals", label: "Approvals", icon: ShieldCheck },
+
+  { to: "/admin/customers", label: "Customers", icon: Users },
+
+  {
+    to: "/admin/messages",
+    label: "Messages",
+    icon: MessageSquare,
+    badge: unreadMsgs,
+  },
+];
 
   if (authLoading)
     return (
