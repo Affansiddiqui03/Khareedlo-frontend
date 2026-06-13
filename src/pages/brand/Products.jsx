@@ -6,7 +6,7 @@ import { useOutletContext } from "react-router-dom";
 import {
   Plus, Trash2, Eye, X, Upload, CheckCircle,
   AlertCircle, Clock, Package, ImageIcon,
-  Globe, Loader2, ChevronDown,
+  Globe, Loader2, ChevronDown, RefreshCw,
 } from "lucide-react";
 
 const API = "https://khareedlo-backend-production.up.railway.app";
@@ -213,7 +213,7 @@ function resolveImg(image) {
 }
 
 export default function Products() {
-  const { theme, brandId } = useOutletContext();
+  const { theme, brandId, brandName = "" } = useOutletContext();
 
   const [products,     setProducts]     = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -224,6 +224,36 @@ export default function Products() {
   const [deleteId,     setDeleteId]     = useState(null);
   const [preview,      setPreview]      = useState(null);
   const [filterStatus, setFilterStatus] = useState("ALL");
+
+  const [posSyncing, setPosSyncing] = useState(false);
+  const [posSyncMsg, setPosSyncMsg] = useState(null);
+
+  // Which POS slug this brand maps to (null = no POS)
+  const lowerName = brandName.toLowerCase();
+  const posSlug   = lowerName.includes("alkaram")   ? "alkaram"
+                  : lowerName.includes("limelight")  ? "limelight"
+                  : null;
+
+  const handlePOSSync = async () => {
+    if (!posSlug) return;
+    setPosSyncing(true);
+    setPosSyncMsg(null);
+    try {
+      const res  = await fetch(`${API}/api/sync/${posSlug}`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Sync failed");
+      const r = data.result || {};
+      setPosSyncMsg({
+        type: "success",
+        text: `POS sync done! ${r.inserted ?? 0} new products added as Pending, ${r.updated ?? 0} updated. Ask admin to approve them.`,
+      });
+      fetchProducts();
+    } catch (err) {
+      setPosSyncMsg({ type: "error", text: "Sync failed: " + err.message });
+    } finally {
+      setPosSyncing(false);
+    }
+  };
 
   const activeCat  = CATEGORIES.find(c => String(c.id) === String(form.category_id));
   const subOptions = activeCat ? activeCat.subs : [];
@@ -310,18 +340,47 @@ export default function Products() {
     <div className="space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Products</h1>
           <p className="text-sm text-gray-500 mt-0.5">{products.length} product{products.length !== 1 ? "s" : ""} total</p>
         </div>
-        <button
-          onClick={() => { setShowModal(true); setForm(emptyForm); setPreview(null); setSubmitMsg(null); }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
-          style={{ background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentLight})` }}>
-          <Plus className="w-4 h-4" /> Add Product
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {posSlug && (
+            <button
+              onClick={handlePOSSync}
+              disabled={posSyncing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+              style={{ borderColor: theme.accent, color: theme.accent }}>
+              <RefreshCw className={`w-4 h-4 ${posSyncing ? "animate-spin" : ""}`} />
+              {posSyncing ? "Syncing from POS…" : "Pull from POS"}
+            </button>
+          )}
+          <button
+            onClick={() => { setShowModal(true); setForm(emptyForm); setPreview(null); setSubmitMsg(null); }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            style={{ background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentLight})` }}>
+            <Plus className="w-4 h-4" /> Add Product
+          </button>
+        </div>
       </div>
+
+      {/* POS Sync result message */}
+      {posSyncMsg && (
+        <div className={`flex items-start gap-3 p-4 rounded-xl text-sm ${
+          posSyncMsg.type === "error"
+            ? "bg-red-50 border border-red-100 text-red-700"
+            : "bg-emerald-50 border border-emerald-100 text-emerald-700"
+        }`}>
+          {posSyncMsg.type === "error"
+            ? <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            : <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
+          <span>{posSyncMsg.text}</span>
+          <button onClick={() => setPosSyncMsg(null)} className="ml-auto text-current opacity-50 hover:opacity-100">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
