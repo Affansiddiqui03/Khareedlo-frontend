@@ -154,7 +154,7 @@ export default function Auth() {
   const forgotReady         = validEmail(fpEmail) && fpNew.length >= 6 && fpNew === fpConfirm;
 
   const clearAll = () => {
-    setMsg(null); setErrs({});
+    setErrs({});
     setCName(""); setCEmail(""); setCPass(""); setCConfirm("");
     setBName(""); setBEmail(""); setBPass(""); setBConfirm("");
     setBContact(""); setBWebsite(""); setBLogo(null); setBLogoPreview(null);
@@ -162,8 +162,8 @@ export default function Auth() {
     setFpEmail(""); setFpNew(""); setFpConfirm("");
   };
 
-  const switchTab  = (t) => { clearAll(); setTab(t);  setMode("login"); };
-  const switchMode = (m) => { clearAll(); setMode(m); };
+  const switchTab  = (t) => { clearAll(); setMsg(null); setTab(t);  setMode("login"); };
+  const switchMode = (m, keepMsg = false) => { clearAll(); if (!keepMsg) setMsg(null); setMode(m); };
 
   const handleLogo = (e) => {
     const file = e.target.files?.[0];
@@ -204,7 +204,7 @@ export default function Auth() {
         const data = await res.json();
         if (!res.ok) { setMsg(data.message || "Registration failed"); return; }
         setMsg("Account created! Please login.");
-        switchMode("login");
+        switchMode("login", true);
       } catch { setMsg("Server error. Try again."); } finally { setLoading(false); }
     }
   };
@@ -274,7 +274,7 @@ export default function Auth() {
       const data = await res.json();
       if (!res.ok) { setMsg(data.message || "Reset failed"); return; }
       setMsg("Password updated! Please login.");
-      setTimeout(() => switchMode("login"), 1500);
+      setTimeout(() => switchMode("login", true), 1500);
     } catch { setMsg("Server error. Try again."); } finally { setLoading(false); }
   };
 
