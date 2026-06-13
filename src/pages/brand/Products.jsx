@@ -127,7 +127,7 @@ function resolveImg(image) {
 }
 
 export default function Products() {
-  const { theme, brandId, user } = useOutletContext();
+  const { theme, brandId, brandName } = useOutletContext();
 
   const [products,     setProducts]     = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -151,9 +151,10 @@ export default function Products() {
   const [posMsg,       setPosMsg]       = useState(null);
 
   // Determine if brand has POS integration
-  const brandName = (user?.brand_name || user?.name || "").toLowerCase();
-  const posSlug   = brandName.includes("alkaram") ? "alkaram"
-                  : brandName.includes("limelight") ? "limelight"
+  // brandName comes from BrandLayout context (user.name or user.brand_name)
+  const brandNameLower = (brandName || "").toLowerCase();
+  const posSlug   = brandNameLower.includes("alkaram") ? "alkaram"
+                  : brandNameLower.includes("limelight") ? "limelight"
                   : null;
 
   const activeCat      = CATEGORIES.find(c => String(c.id) === String(form.category_id));
