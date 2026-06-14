@@ -76,6 +76,8 @@ export default function ProductDetail() {
   const [product,      setProduct]      = useState(null);
   const [comparePool,  setComparePool]  = useState([]);
   const [compareId,    setCompareId]    = useState("");
+  const [compareSearch, setCompareSearch] = useState("");
+  const [compareCat,   setCompareCat]   = useState(""); // sub-category filter within gender
   const [loading,      setLoading]      = useState(true);
   const [cartFlash,    setCartFlash]    = useState(false);
   const [showLogin,    setShowLogin]    = useState(false);
@@ -86,7 +88,20 @@ export default function ProductDetail() {
   const [alreadyRated, setAlreadyRated] = useState(false);
   const [ratingChecked,setRatingChecked]= useState(false);
 
-  const compareProduct = comparePool.find(p => String(p.id || p.product_id) === String(compareId));
+  const filteredPool = comparePool.filter(p => {
+    const name = (p.title || p.product_name || "").toLowerCase();
+    const brand = (p.brand || p.brand_name || "").toLowerCase();
+    const matchSearch = !compareSearch || name.includes(compareSearch.toLowerCase()) || brand.includes(compareSearch.toLowerCase());
+    const matchCat = !compareCat || String(p.sub_category_id) === String(compareCat) || (p.category_name || "").toLowerCase() === compareCat.toLowerCase();
+    return matchSearch && matchCat;
+  });
+
+  // Auto-select first result when search narrows to 1-3 results
+  const autoSelectedId = filteredPool.length > 0 && filteredPool.length <= 3 && compareSearch
+    ? String(filteredPool[0].id || filteredPool[0].product_id)
+    : compareId;
+
+  const compareProduct = comparePool.find(p => String(p.id || p.product_id) === String(autoSelectedId));
 
   useEffect(() => {
     setLoading(true);
@@ -280,24 +295,61 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 mb-1">Compare with other {gender || ""} Products</h2>
-          <p className="text-xs text-gray-400 mb-4 sm:mb-5">Comparing across all brands in the same category</p>
+          <p className="text-xs text-gray-400 mb-4 sm:mb-5">Comparing within same gender — filter by category or search by name</p>
           {comparePool.length === 0 ? (
             <p className="text-sm text-gray-400">No other {gender} products available to compare.</p>
           ) : (
             <>
-              <select value={compareId} onChange={e => setCompareId(e.target.value)}
+              {/* Search + Category filter row */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                <input
+                  type="text"
+                  value={compareSearch}
+                  onChange={e => {
+                    setCompareSearch(e.target.value);
+                    if (!e.target.value) setCompareId(""); // clear selection when search cleared
+                  }}
+                  placeholder="Search product or brand to compare…"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                />
+                <select
+                  value={compareCat}
+                  onChange={e => { setCompareCat(e.target.value); setCompareId(""); }}
+                  className="sm:w-52 px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 cursor-pointer"
+                >
+                  <option value="">All {gender} categories</option>
+                  {[...new Set(comparePool.map(p => p.category_name).filter(Boolean))].map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              <select value={autoSelectedId} onChange={e => { setCompareId(e.target.value); setCompareSearch(""); }}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 mb-5 sm:mb-7 cursor-pointer">
                 <option value="">— Select a product to compare —</option>
-                {comparePool.map(p => <option key={p.id || p.product_id} value={p.id || p.product_id}>{p.title || p.product_name} — PKR {Number(p.price).toLocaleString()}</option>)}
+                {filteredPool.map(p => {
+                  const isT = Number(p.score) > 15;
+                  return (
+                    <option key={p.id || p.product_id} value={p.id || p.product_id}>
+                      {isT ? "🔥 " : ""}{p.title || p.product_name} — PKR {Number(p.price).toLocaleString()} {p.brand || p.brand_name ? `(${p.brand || p.brand_name})` : ""}
+                    </option>
+                  );
+                })}
               </select>
+
+              {filteredPool.length === 0 && (
+                <p className="text-sm text-gray-400 mb-4">No products match your search/filter.</p>
+              )}
+
               {compareProduct && (
                 <>
                   {/* Mobile: card layout */}
                   <div className="sm:hidden space-y-4">
                     <div className="grid grid-cols-2 gap-3">
-                      {[{img: src, name: title, label: "This Product"}, {img: resolveImg(compareProduct.image), name: compareProduct.title || compareProduct.product_name, label: "Compared"}].map((x, i) => (
+                      {[{img: src, name: title, label: "This Product", trend: isTrend}, {img: resolveImg(compareProduct.image), name: compareProduct.title || compareProduct.product_name, label: "Compared", trend: Number(compareProduct.score) > 15}].map((x, i) => (
                         <div key={i} className={`rounded-2xl p-3 text-center ${i === 0 ? "bg-red-50 border border-red-100" : "bg-gray-50 border border-gray-100"}`}>
                           <p className={`text-[10px] font-black uppercase tracking-wider mb-2 ${i === 0 ? "text-red-500" : "text-gray-400"}`}>{x.label}</p>
+                          {x.trend && <span className="inline-block text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full mb-1">🔥 Trending</span>}
                           {x.img ? <img src={x.img} className="h-24 w-full object-cover rounded-xl mb-2" alt="" onError={e => e.currentTarget.style.display="none"} /> : <div className="h-24 bg-gray-100 rounded-xl mb-2 flex items-center justify-center"><Package className="w-6 h-6 text-gray-300" /></div>}
                           <p className="text-xs font-bold text-gray-700 line-clamp-2">{x.name}</p>
                         </div>
@@ -306,7 +358,8 @@ export default function ProductDetail() {
                     {[
                       {label: "Brand", v1: product.brand || product.brand_name, v2: compareProduct.brand || compareProduct.brand_name},
                       {label: "Price", v1: `PKR ${Number(product.price).toLocaleString()}`, v2: `PKR ${Number(compareProduct.price).toLocaleString()}`, bold: true},
-                      {label: "Trending", v1: isTrend ? "🔥 Yes" : "—", v2: Number(compareProduct.score) > 15 ? "🔥 Yes" : "—"},
+                      {label: "Category", v1: product.category_name || gender || "—", v2: compareProduct.category_name || compareProduct.gender || "—"},
+                      {label: "Trending", v1: isTrend ? "🔥 Trending" : "—", v2: Number(compareProduct.score) > 15 ? "🔥 Trending" : "—"},
                     ].map(row => (
                       <div key={row.label} className="bg-gray-50 rounded-2xl p-3">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{row.label}</p>
@@ -331,8 +384,12 @@ export default function ProductDetail() {
                       <thead>
                         <tr className="border-b border-gray-100">
                           <th className="py-3 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest w-1/4">Feature</th>
-                          <th className="py-3 px-4 text-center text-xs font-bold text-red-500 uppercase tracking-widest">This Product</th>
-                          <th className="py-3 px-4 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">Compared</th>
+                          <th className="py-3 px-4 text-center text-xs font-bold text-red-500 uppercase tracking-widest">
+                            This Product {isTrend && <span className="ml-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">🔥 Trending</span>}
+                          </th>
+                          <th className="py-3 px-4 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">
+                            Compared {Number(compareProduct.score) > 15 && <span className="ml-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">🔥 Trending</span>}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -347,6 +404,7 @@ export default function ProductDetail() {
                         <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Name</td><td className="py-4 px-4 text-center font-semibold text-gray-800 text-sm">{title}</td><td className="py-4 px-4 text-center font-semibold text-gray-800 text-sm">{compareProduct.title || compareProduct.product_name}</td></tr>
                         <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Brand</td><td className="py-4 px-4 text-center text-gray-700">{product.brand || product.brand_name}</td><td className="py-4 px-4 text-center text-gray-700">{compareProduct.brand || compareProduct.brand_name}</td></tr>
                         <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Price</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(product.price).toLocaleString()}</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(compareProduct.price).toLocaleString()}</td></tr>
+                        <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Category</td><td className="py-4 px-4 text-center text-gray-600 text-sm">{product.category_name || gender || "—"}</td><td className="py-4 px-4 text-center text-gray-600 text-sm">{compareProduct.category_name || compareProduct.gender || "—"}</td></tr>
                         <tr className="border-b border-gray-50">
                           <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</td>
                           <td className="py-4 px-4"><div className="flex justify-center">{avgRating > 0 ? <StarRow rating={avgRating} count={ratingCount} /> : <span className="text-xs text-gray-400">No ratings yet</span>}</div></td>
@@ -354,8 +412,8 @@ export default function ProductDetail() {
                         </tr>
                         <tr>
                           <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Trending</td>
-                          <td className="py-4 px-4 text-center">{isTrend ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Yes</span> : <span className="text-xs text-gray-400">—</span>}</td>
-                          <td className="py-4 px-4 text-center">{Number(compareProduct.score)>15 ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Yes</span> : <span className="text-xs text-gray-400">—</span>}</td>
+                          <td className="py-4 px-4 text-center">{isTrend ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Trending</span> : <span className="text-xs text-gray-400">—</span>}</td>
+                          <td className="py-4 px-4 text-center">{Number(compareProduct.score)>15 ? <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"><TrendingUp className="w-3 h-3" /> Trending</span> : <span className="text-xs text-gray-400">—</span>}</td>
                         </tr>
                       </tbody>
                     </table>

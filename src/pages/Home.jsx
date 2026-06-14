@@ -120,51 +120,64 @@ export default function Home() {
 
         {/* ═════════ HERO CAROUSEL ═════════ */}
         <section className="w-full px-2 sm:px-4 overflow-hidden mt-3">
-          <Carousel
-            autoPlay infiniteLoop showThumbs={false} showStatus={false}
-            renderArrowPrev={(onClickHandler, hasPrev) =>
-              hasPrev && (
-                <button onClick={onClickHandler}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 hidden sm:flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95">
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-              )
-            }
-            renderArrowNext={(onClickHandler, hasNext) =>
-              hasNext && (
-                <button onClick={onClickHandler}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 hidden sm:flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95">
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              )
-            }
-          >
-            {[banner1, banner2, banner3, banner4].map((img, i) => (
-              <div key={i} className="relative w-full h-[42vh] sm:h-[58vh] md:h-[75vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
-                <img src={img} alt="KHAREEDLO Banner" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
-                  <div className="text-center px-4 sm:px-10 max-w-2xl">
-                    <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight">
-                      Discover Premium <br className="hidden sm:block" /> Fashion Brands
-                    </h1>
-                    <p className="mt-2 sm:mt-4 text-white/80 text-xs sm:text-base max-w-lg mx-auto">
-                      Pakistan's fashion discovery platform — explore brands, find outlets, shop smart.
-                    </p>
-                    <div className="mt-5 sm:mt-8 flex flex-row justify-center gap-2 sm:gap-4">
-                      <Link to="/products"
-                        className="px-5 sm:px-8 py-2 sm:py-3 rounded-full bg-gradient-to-r from-red-600 to-[#f2976a] text-white font-semibold hover:shadow-lg transition-shadow text-sm sm:text-base">
-                        Shop Now
-                      </Link>
-                      <Link to="/brands"
-                        className="px-5 sm:px-8 py-2 sm:py-3 rounded-full bg-white text-black font-semibold hover:shadow-lg transition-shadow text-sm sm:text-base">
-                        Explore Brands
-                      </Link>
-                    </div>
-                  </div>
+          {/* Wrapper: position relative so content overlay sits on top of carousel */}
+          <div className="relative w-full h-[42vh] sm:h-[58vh] md:h-[75vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
+
+            {/* Images-only carousel — no content inside slides */}
+            <Carousel
+              autoPlay infiniteLoop showThumbs={false} showStatus={false}
+              interval={4500}
+              transitionTime={700}
+              swipeable
+              emulateTouch
+              showIndicators={true}
+              renderArrowPrev={(onClickHandler, hasPrev) =>
+                hasPrev && (
+                  <button onClick={onClickHandler}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 hidden sm:flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95">
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                )
+              }
+              renderArrowNext={(onClickHandler, hasNext) =>
+                hasNext && (
+                  <button onClick={onClickHandler}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 hidden sm:flex items-center justify-center bg-black/30 hover:bg-black/50 backdrop-blur-md text-white rounded-full border border-white/20 shadow-xl transition-all hover:scale-110 active:scale-95">
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                )
+              }
+            >
+              {[banner1, banner2, banner3, banner4].map((img, i) => (
+                <div key={i} className="w-full h-[42vh] sm:h-[58vh] md:h-[75vh]">
+                  <img src={img} alt="KHAREEDLO Banner" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </Carousel>
+
+            {/* ── FIXED CONTENT OVERLAY — does NOT move with carousel ── */}
+            <div className="absolute inset-0 bg-black/55 flex items-center justify-center z-10 pointer-events-none">
+              <div className="text-center px-4 sm:px-10 max-w-2xl pointer-events-auto">
+                <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight">
+                  Discover Premium <br className="hidden sm:block" /> Fashion Brands
+                </h1>
+                <p className="mt-2 sm:mt-4 text-white/80 text-xs sm:text-base max-w-lg mx-auto">
+                  Pakistan's fashion discovery platform — explore brands, find outlets, shop smart.
+                </p>
+                <div className="mt-5 sm:mt-8 flex flex-row justify-center gap-2 sm:gap-4">
+                  <Link to="/products"
+                    className="px-5 sm:px-8 py-2 sm:py-3 rounded-full bg-gradient-to-r from-red-600 to-[#f2976a] text-white font-semibold hover:shadow-lg transition-shadow text-sm sm:text-base">
+                    Shop Now
+                  </Link>
+                  <Link to="/brands"
+                    className="px-5 sm:px-8 py-2 sm:py-3 rounded-full bg-white text-black font-semibold hover:shadow-lg transition-shadow text-sm sm:text-base">
+                    Explore Brands
+                  </Link>
                 </div>
               </div>
-            ))}
-          </Carousel>
+            </div>
+
+          </div>
         </section>
 
         {/* ═════════ POPULAR BRANDS ═════════ */}
