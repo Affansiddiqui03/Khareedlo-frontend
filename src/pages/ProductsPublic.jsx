@@ -180,7 +180,8 @@ export default function ProductsPublic() {
   const [priceMax,    setPriceMax]    = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [minRating,   setMinRating]   = useState(0);
-  const [activeBrand, setActiveBrand] = useState("All");
+  const [activeBrand,   setActiveBrand]   = useState("All");
+  const [activeCategory, setActiveCategory] = useState("All"); // sub_category_id or "All"
 
   useEffect(() => {
     setLoading(true);
@@ -194,6 +195,19 @@ export default function ProductsPublic() {
     const set = new Set(products.map(p => p.brand || p.brand_name).filter(Boolean));
     return ["All", ...set];
   }, [products]);
+
+  // Sub-categories available for the currently selected gender
+  const subCategories = useMemo(() => {
+    const genderFiltered = gender === "All"
+      ? products
+      : products.filter(p => (p.category || p.gender || "").toLowerCase() === gender.toLowerCase());
+    const map = new Map();
+    genderFiltered.forEach(p => {
+      if (p.sub_category_id && p.sub_category_name)
+        map.set(String(p.sub_category_id), p.sub_category_name);
+    });
+    return [...map.entries()].map(([id, name]) => ({ id, name }));
+  }, [products, gender]);
 
   const filtered = useMemo(() => {
     let data = [...products];
@@ -216,6 +230,10 @@ export default function ProductsPublic() {
       );
     }
 
+    if (activeCategory !== "All") {
+      data = data.filter(p => String(p.sub_category_id) === String(activeCategory));
+    }
+
     if (priceMin !== "") data = data.filter(p => Number(p.price) >= Number(priceMin));
     if (priceMax !== "") data = data.filter(p => Number(p.price) <= Number(priceMax));
     if (minRating > 0)   data = data.filter(p => (Number(p.avg_rating) || 0) >= minRating);
@@ -229,7 +247,7 @@ export default function ProductsPublic() {
     }
 
     return data;
-  }, [q, activeBrand, gender, sortBy, priceMin, priceMax, minRating, products]);
+  }, [q, activeBrand, gender, activeCategory, sortBy, priceMin, priceMax, minRating, products]);
 
   const handleAddToCart = (product) => {
     if (!user) { navigate("/auth"); return; }
@@ -243,12 +261,13 @@ export default function ProductsPublic() {
   const activeFilterCount = [
     gender !== "All", sortBy !== "default",
     priceMin !== "", priceMax !== "", minRating > 0, activeBrand !== "All",
+    activeCategory !== "All",
   ].filter(Boolean).length;
 
   const clearAll = () => {
     setGender("All"); setSortBy("default");
     setPriceMin(""); setPriceMax("");
-    setMinRating(0); setActiveBrand("All"); setQ("");
+    setMinRating(0); setActiveBrand("All"); setQ(""); setActiveCategory("All");
   };
 
   return (
@@ -305,10 +324,10 @@ export default function ProductsPublic() {
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-gray-50 space-y-4">
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Category</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Gender</p>
                 <div className="flex flex-wrap gap-2">
                   {GENDERS.map(g => (
-                    <button key={g} onClick={() => setGender(g)}
+                    <button key={g} onClick={() => { setGender(g); setActiveCategory("All"); }}
                       className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
                         gender === g ? "text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       }`}
@@ -318,6 +337,30 @@ export default function ProductsPublic() {
                   ))}
                 </div>
               </div>
+
+              {subCategories.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sub-Category</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => setActiveCategory("All")}
+                      className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                        activeCategory === "All" ? "text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                      style={activeCategory === "All" ? { background: "linear-gradient(135deg, #DC2626, #EA580C)" } : {}}>
+                      All
+                    </button>
+                    {subCategories.map(sc => (
+                      <button key={sc.id} onClick={() => setActiveCategory(sc.id)}
+                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                          activeCategory === sc.id ? "text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                        style={activeCategory === sc.id ? { background: "linear-gradient(135deg, #DC2626, #EA580C)" } : {}}>
+                        {sc.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-6 items-end">
                 <div>

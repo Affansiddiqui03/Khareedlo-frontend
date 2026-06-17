@@ -229,6 +229,8 @@ export default function ProductDetail() {
             <ZoomImage src={src} alt={title} />
             <div className="flex gap-2 mt-4 flex-wrap">
               {gender  && <span className="px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-semibold text-gray-600">{gender}</span>}
+              {product.category_name && <span className="px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-600">{product.category_name}</span>}
+              {product.sub_category_name && <span className="px-3 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-xs font-semibold text-purple-600">{product.sub_category_name}</span>}
               {isTrend && <span className="px-3 py-1.5 rounded-full bg-red-50 border border-red-100 text-xs font-bold text-red-600">🔥 Trending</span>}
             </div>
           </div>
@@ -369,6 +371,7 @@ export default function ProductDetail() {
                       {label: "Brand", v1: product.brand || product.brand_name, v2: compareProduct.brand || compareProduct.brand_name},
                       {label: "Price", v1: `PKR ${Number(product.price).toLocaleString()}`, v2: `PKR ${Number(compareProduct.price).toLocaleString()}`, bold: true},
                       {label: "Category", v1: product.category_name || gender || "—", v2: compareProduct.category_name || compareProduct.gender || "—"},
+                      {label: "Sub-Category", v1: product.sub_category_name || "—", v2: compareProduct.sub_category_name || "—"},
                       {label: "Trending", v1: isTrend ? "🔥 Trending" : "—", v2: Number(compareProduct.score) > 15 ? "🔥 Trending" : "—"},
                     ].map(row => (
                       <div key={row.label} className="bg-gray-50 rounded-2xl p-3">
@@ -415,6 +418,7 @@ export default function ProductDetail() {
                         <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Brand</td><td className="py-4 px-4 text-center text-gray-700">{product.brand || product.brand_name}</td><td className="py-4 px-4 text-center text-gray-700">{compareProduct.brand || compareProduct.brand_name}</td></tr>
                         <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Price</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(product.price).toLocaleString()}</td><td className="py-4 px-4 text-center font-black text-orange-600 text-base">PKR {Number(compareProduct.price).toLocaleString()}</td></tr>
                         <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Category</td><td className="py-4 px-4 text-center text-gray-600 text-sm">{product.category_name || gender || "—"}</td><td className="py-4 px-4 text-center text-gray-600 text-sm">{compareProduct.category_name || compareProduct.gender || "—"}</td></tr>
+                        <tr className="border-b border-gray-50"><td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Sub-Category</td><td className="py-4 px-4 text-center text-gray-600 text-sm">{product.sub_category_name || "—"}</td><td className="py-4 px-4 text-center text-gray-600 text-sm">{compareProduct.sub_category_name || "—"}</td></tr>
                         <tr className="border-b border-gray-50">
                           <td className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</td>
                           <td className="py-4 px-4"><div className="flex justify-center">{avgRating > 0 ? <StarRow rating={avgRating} count={ratingCount} /> : <span className="text-xs text-gray-400">No ratings yet</span>}</div></td>
