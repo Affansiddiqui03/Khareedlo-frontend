@@ -77,7 +77,7 @@ export default function ProductDetail() {
   const [comparePool,  setComparePool]  = useState([]);
   const [compareId,    setCompareId]    = useState("");
   const [compareSearch, setCompareSearch] = useState("");
-  const [compareCat,   setCompareCat]   = useState(""); // sub-category filter within gender
+  const [compareCat,   setCompareCat]   = useState(""); // sub-category filter (sub_category_id)
   const [loading,      setLoading]      = useState(true);
   const [cartFlash,    setCartFlash]    = useState(false);
   const [showLogin,    setShowLogin]    = useState(false);
@@ -92,9 +92,16 @@ export default function ProductDetail() {
     const name = (p.title || p.product_name || "").toLowerCase();
     const brand = (p.brand || p.brand_name || "").toLowerCase();
     const matchSearch = !compareSearch || name.includes(compareSearch.toLowerCase()) || brand.includes(compareSearch.toLowerCase());
-    const matchCat = !compareCat || String(p.sub_category_id) === String(compareCat) || (p.category_name || "").toLowerCase() === compareCat.toLowerCase();
+    const matchCat = !compareCat || String(p.sub_category_id) === String(compareCat);
     return matchSearch && matchCat;
   });
+
+  // Unique sub-categories from comparePool for the first dropdown
+  const subCategoryOptions = [...new Map(
+    comparePool
+      .filter(p => p.sub_category_id && p.sub_category_name)
+      .map(p => [p.sub_category_id, { id: p.sub_category_id, name: p.sub_category_name }])
+  ).values()];
 
   // Auto-select first result when search narrows to 1-3 results
   const autoSelectedId = filteredPool.length > 0 && filteredPool.length <= 3 && compareSearch
@@ -300,30 +307,31 @@ export default function ProductDetail() {
             <p className="text-sm text-gray-400">No other {gender} products available to compare.</p>
           ) : (
             <>
-              {/* Search + Category filter row */}
-              <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              {/* Step 1: Sub-category filter dropdown */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                <select
+                  value={compareCat}
+                  onChange={e => { setCompareCat(e.target.value); setCompareId(""); setCompareSearch(""); }}
+                  className="sm:w-60 px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 cursor-pointer"
+                >
+                  <option value="">All sub-categories</option>
+                  {subCategoryOptions.map(sc => (
+                    <option key={sc.id} value={sc.id}>{sc.name}</option>
+                  ))}
+                </select>
                 <input
                   type="text"
                   value={compareSearch}
                   onChange={e => {
                     setCompareSearch(e.target.value);
-                    if (!e.target.value) setCompareId(""); // clear selection when search cleared
+                    if (!e.target.value) setCompareId("");
                   }}
-                  placeholder="Search product or brand to compare…"
+                  placeholder="Search by name or brand…"
                   className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                 />
-                <select
-                  value={compareCat}
-                  onChange={e => { setCompareCat(e.target.value); setCompareId(""); }}
-                  className="sm:w-52 px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 cursor-pointer"
-                >
-                  <option value="">All {gender} categories</option>
-                  {[...new Set(comparePool.map(p => p.category_name).filter(Boolean))].map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
               </div>
 
+              {/* Step 2: Products dropdown — filtered by selected sub-category */}
               <select value={autoSelectedId} onChange={e => { setCompareId(e.target.value); setCompareSearch(""); }}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-200 mb-5 sm:mb-7 cursor-pointer">
                 <option value="">— Select a product to compare —</option>
@@ -338,7 +346,9 @@ export default function ProductDetail() {
               </select>
 
               {filteredPool.length === 0 && (
-                <p className="text-sm text-gray-400 mb-4">No products match your search/filter.</p>
+                <p className="text-sm text-gray-400 mb-4">
+                  {compareCat ? "No products in this sub-category." : "No products match your search."}
+                </p>
               )}
 
               {compareProduct && (
