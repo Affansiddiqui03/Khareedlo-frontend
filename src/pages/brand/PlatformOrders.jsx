@@ -8,13 +8,16 @@ import { useOutletContext } from "react-router-dom";
 import {
   ShoppingBag, TrendingUp, PackageCheck,
   RefreshCw, ExternalLink, Clock, CheckCircle,
-  Truck, Package,
+  Truck, Package, X, AlertTriangle,
 } from "lucide-react";
 
 const STATUS_CONFIG = {
   reported:  { label: "Reported",  color: "text-amber-600",  bg: "bg-amber-50",   icon: Clock       },
   confirmed: { label: "Confirmed", color: "text-blue-600",   bg: "bg-blue-50",    icon: CheckCircle },
   delivered: { label: "Delivered", color: "text-emerald-600",bg: "bg-emerald-50", icon: Truck       },
+  cancelled: { label: "Cancelled", color: "text-red-600",    bg: "bg-red-50",     icon: X           },
+  refunded:  { label: "Refunded",  color: "text-orange-600", bg: "bg-orange-50",  icon: X           },
+  exchanged: { label: "Exchanged", color: "text-purple-600", bg: "bg-purple-50",  icon: Package     },
 };
 
 const SOURCE_CONFIG = {
@@ -80,12 +83,14 @@ export default function PlatformOrders() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {[
-          { label: "Total Orders",    val: summary.total_orders   || 0, icon: ShoppingBag,  color: theme.accent   },
-          { label: "Total Revenue",   val: `PKR ${(summary.total_revenue || 0).toLocaleString()}`, icon: TrendingUp, color: "#10B981" },
-          { label: "Via Loyverse",    val: summary.loyverse_orders|| 0, icon: PackageCheck, color: "#7C3AED"      },
-          { label: "Via Square",      val: summary.square_orders  || 0, icon: PackageCheck, color: "#2563EB"      },
+          { label: "Total Orders",    val: summary.total_orders    || 0, icon: ShoppingBag,   color: theme.accent  },
+          { label: "Active Orders",   val: summary.active_orders   || 0, icon: CheckCircle,   color: "#10B981"     },
+          { label: "Cancelled/Refunded", val: summary.cancelled_orders || 0, icon: AlertTriangle, color: "#EF4444" },
+          { label: "Net Revenue",     val: `PKR ${(summary.total_revenue || 0).toLocaleString()}`, icon: TrendingUp, color: "#10B981" },
+          { label: "Via Loyverse",    val: summary.loyverse_orders || 0, icon: PackageCheck,  color: "#7C3AED"     },
+          { label: "Via Square",      val: summary.square_orders   || 0, icon: PackageCheck,  color: "#2563EB"     },
         ].map(({ label, val, icon: Icon, color }) => (
           <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
@@ -108,6 +113,9 @@ export default function PlatformOrders() {
           ["reported",      "Pending"        ],
           ["confirmed",     "Confirmed"      ],
           ["delivered",     "Delivered"      ],
+          ["cancelled",     "Cancelled"      ],
+          ["refunded",      "Refunded"       ],
+          ["exchanged",     "Exchanged"      ],
         ].map(([val, label]) => (
           <button key={val} onClick={() => setFilter(val)}
             className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
@@ -194,20 +202,33 @@ export default function PlatformOrders() {
               </tbody>
 
               {/* Totals row */}
-              {filtered.length > 0 && (
-                <tfoot>
-                  <tr className="bg-gray-50 border-t-2 border-gray-200">
-                    <td className="px-5 py-3 font-bold text-gray-700">TOTAL ({filtered.length} orders)</td>
-                    <td className="px-5 py-3 text-center font-bold text-gray-700">
-                      {filtered.reduce((s, o) => s + (o.quantity || 0), 0)}
-                    </td>
-                    <td className="px-5 py-3 text-center font-extrabold" style={{ color: theme.accent }}>
-                      PKR {filtered.reduce((s, o) => s + parseFloat(o.total_price || 0), 0).toLocaleString()}
-                    </td>
-                    <td colSpan={4} />
-                  </tr>
-                </tfoot>
-              )}
+              {filtered.length > 0 && (() => {
+                const cancelledSt = ["cancelled", "refunded", "exchanged"];
+                const activeFiltered = filtered.filter(o => !cancelledSt.includes(o.status));
+                const netRevenue = activeFiltered.reduce((s, o) => s + parseFloat(o.total_price || 0), 0);
+                return (
+                  <tfoot>
+                    <tr className="bg-gray-50 border-t-2 border-gray-200">
+                      <td className="px-5 py-3 font-bold text-gray-700">
+                        TOTAL ({filtered.length} orders
+                        {filtered.length !== activeFiltered.length && (
+                          <span className="text-red-500 ml-1 text-xs">· {filtered.length - activeFiltered.length} cancelled/refunded</span>
+                        )})
+                      </td>
+                      <td className="px-5 py-3 text-center font-bold text-gray-700">
+                        {activeFiltered.reduce((s, o) => s + (o.quantity || 0), 0)}
+                      </td>
+                      <td className="px-5 py-3 text-center font-extrabold" style={{ color: theme.accent }}>
+                        PKR {netRevenue.toLocaleString()}
+                        {filtered.length !== activeFiltered.length && (
+                          <p className="text-[10px] text-red-400 font-normal">(cancelled excluded)</p>
+                        )}
+                      </td>
+                      <td colSpan={4} />
+                    </tr>
+                  </tfoot>
+                );
+              })()}
             </table>
           </div>
         )}

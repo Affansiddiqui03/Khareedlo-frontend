@@ -47,6 +47,7 @@ import BrandOutlets from "./pages/brand/Outlet.jsx";
 
 
 // Providers
+import FloatingOrdersButton from "./components/FloatingOrdersButton";
 import { AuthProvider }     from "./contexts/AuthContext";
 import { CartProvider }     from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
@@ -122,6 +123,7 @@ export default function App() {
 
             </Routes>
           </Router>
+          <FloatingOrdersButton />
         </WishlistProvider>
       </CartProvider>
     </AuthProvider>
