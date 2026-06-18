@@ -122,10 +122,10 @@ function ReasonPicker({ order, onConfirm, onBack, loading }) {
   );
 }
 
-// ── Step 2 (Exchange only): Pick new product with sub-category filter
+// ── Step 2 (Exchange only): Pick new product — same brand only
 function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
   const [search,    setSearch]    = useState("");
-  const [products,  setProducts]  = useState([]);
+  const [allProds,  setAllProds]  = useState([]);
   const [loading,   setLoading]   = useState(false);
   const [fetchErr,  setFetchErr]  = useState("");
   const [activeCat, setActiveCat] = useState("all");
@@ -133,38 +133,34 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
   useEffect(() => {
     setLoading(true);
     setFetchErr("");
-
-    // Fetch ALL approved products — simplest approach, always works
-    // User can search by name or filter by sub-category
+    // Fetch ALL approved products from main endpoint (guaranteed to work)
     fetch(`${BASE}/api/products`)
-      .then(r => { if (!r.ok) throw new Error("API error"); return r.json(); })
-      .then(data => {
-        const list = Array.isArray(data) ? data : [];
-        setProducts(list);
-        if (list.length === 0) setFetchErr("No products available.");
-      })
-      .catch(() => {
-        setProducts([]);
-        setFetchErr("Could not load products. Check connection.");
-      })
+      .then(r => { if (!r.ok) throw new Error("err"); return r.json(); })
+      .then(data => setAllProds(Array.isArray(data) ? data : []))
+      .catch(() => { setAllProds([]); setFetchErr("Could not load products."); })
       .finally(() => setLoading(false));
   }, []);
 
-  // Build sub-category tabs from loaded products
+  // Filter client-side by brand_id — guaranteed correct
+  const brandProducts = React.useMemo(() => {
+    if (!oldOrder?.brand_id) return allProds;
+    return allProds.filter(p => String(p.brand_id) === String(oldOrder.brand_id));
+  }, [allProds, oldOrder?.brand_id]);
+
+  // Build sub-category tabs from brand's products only
   const subCats = React.useMemo(() => {
     const map = new Map();
-    products.forEach(p => {
+    brandProducts.forEach(p => {
       if (p.sub_category_id && p.sub_category_name)
         map.set(String(p.sub_category_id), p.sub_category_name);
     });
     return [...map.entries()].map(([id, name]) => ({ id, name }));
-  }, [products]);
+  }, [brandProducts]);
 
-  const filtered = products.filter(p => {
+  const filtered = brandProducts.filter(p => {
     const name  = (p.product_name || p.name || "").toLowerCase();
-    const brand = (p.brand || p.brand_name || "").toLowerCase();
     const q     = search.toLowerCase();
-    const matchSearch = !search || name.includes(q) || brand.includes(q);
+    const matchSearch = !search || name.includes(q);
     const matchCat = activeCat === "all" || String(p.sub_category_id) === activeCat;
     return matchSearch && matchCat;
   }).slice(0, 30);
@@ -191,7 +187,7 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search by product or brand name…"
+          placeholder="Search product name…"
           className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-red-200 bg-gray-50"
         />
       </div>
@@ -237,7 +233,7 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
           <div className="py-10 text-center px-4">
             <Package className="w-8 h-8 text-gray-200 mx-auto mb-2" />
             <p className="text-xs text-gray-400">
-              {fetchErr || (search ? `No results for "${search}"` : "No products in this category")}
+              {fetchErr || (search ? `No results for "${search}"` : brandProducts.length === 0 ? "No products for this brand." : "No products in this category")}
             </p>
           </div>
         ) : (
@@ -265,9 +261,8 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-gray-800 line-clamp-2 leading-tight">{name}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">{p.brand || p.brand_name}</p>
                   {p.sub_category_name && (
-                    <p className="text-[10px] text-purple-500 font-semibold">{p.sub_category_name}</p>
+                    <p className="text-[10px] text-purple-500 font-semibold mt-0.5">{p.sub_category_name}</p>
                   )}
                   <p className="text-[11px] font-black text-red-600 mt-0.5">
                     PKR {Number(p.price).toLocaleString()}
@@ -466,9 +461,9 @@ export default function FloatingOrdersButton() {
         ...newProduct,
         id:         newProduct.id || newProduct.product_id,
         title:      newProduct.product_name || newProduct.name,
-        brand_id:   orderToVoid.brand_id,
-        brand:      orderToVoid.brand_name,
-        brand_name: orderToVoid.brand_name,
+        brand_id:   newProduct.brand_id,
+        brand:      newProduct.brand || newProduct.brand_name,
+        brand_name: newProduct.brand || newProduct.brand_name,
       });
 
       setOpen(false);
