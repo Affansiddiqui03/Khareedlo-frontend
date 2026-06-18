@@ -124,20 +124,56 @@ function ReasonPicker({ order, onConfirm, onBack, loading }) {
 
 // ── Step 2 (Exchange only): Pick new product with sub-category filter
 function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
-  const [search,   setSearch]   = useState("");
-  const [products, setProducts] = useState([]);
-  const [loading,  setLoading]  = useState(false);
+  const [search,    setSearch]    = useState("");
+  const [products,  setProducts]  = useState([]);
+  const [loading,   setLoading]   = useState(false);
+  const [fetchErr,  setFetchErr]  = useState("");
   const [activeCat, setActiveCat] = useState("all");
 
   useEffect(() => {
-    if (!oldOrder?.brand_id) return;
     setLoading(true);
-    fetch(`${BASE}/api/products/brand/${oldOrder.brand_id}`)
-      .then(r => r.json())
-      .then(data => setProducts(Array.isArray(data) ? data : []))
-      .catch(() => setProducts([]))
+    setFetchErr("");
+
+    const brandId   = oldOrder?.brand_id;
+    const brandName = (oldOrder?.brand_name || "").toLowerCase().trim();
+
+    // Strategy 1: fetch by brand_id (most reliable)
+    // Strategy 2: if brand_id missing/invalid, fetch ALL and filter by brand_name
+    const primary = brandId
+      ? fetch(`${BASE}/api/products/brand/${brandId}`)
+          .then(r => { if (!r.ok) throw new Error("not ok"); return r.json(); })
+      : Promise.reject(new Error("no brand_id"));
+
+    primary
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        if (list.length > 0) { setProducts(list); return; }
+        // brand_id returned empty → fallback to all products
+        throw new Error("empty");
+      })
+      .catch(() => {
+        // Fallback: use dedicated brand-name search endpoint
+        if (!brandName) {
+          setProducts([]);
+          setFetchErr("Brand information missing. Try refreshing.");
+          setLoading(false);
+          return;
+        }
+        return fetch(`${BASE}/api/products/by-brand-name?name=${encodeURIComponent(oldOrder?.brand_name || "")}`)
+          .then(r => r.json())
+          .then(all => {
+            const list = Array.isArray(all) ? all : [];
+            setProducts(list);
+            if (list.length === 0) setFetchErr("No approved products found for this brand.");
+          })
+          .catch(() => {
+            setProducts([]);
+            setFetchErr("Could not load products. Check your connection.");
+          });
+      })
       .finally(() => setLoading(false));
-  }, [oldOrder?.brand_id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [oldOrder?.brand_id, oldOrder?.brand_name]);
 
   // Build sub-category tabs from loaded products
   const subCats = React.useMemo(() => {
@@ -214,15 +250,18 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
       )}
 
       {/* Product list */}
-      <div className="space-y-1.5 overflow-y-auto" style={{ maxHeight: "260px" }}>
+      <div className="space-y-1.5 overflow-y-auto" style={{ maxHeight: "min(280px, 40vh)" }}>
         {loading ? (
           <div className="py-10 text-center">
             <Loader2 className="w-5 h-5 text-red-400 animate-spin mx-auto mb-2" />
             <p className="text-xs text-gray-400">Loading products…</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-10 text-center text-xs text-gray-400">
-            {search ? `No results for "${search}"` : products.length === 0 ? "No products found" : "No products in this category"}
+          <div className="py-10 text-center px-4">
+            <Package className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+            <p className="text-xs text-gray-400">
+              {fetchErr || (search ? `No results for "${search}"` : "No products in this category")}
+            </p>
           </div>
         ) : (
           filtered.map(p => {
@@ -510,8 +549,11 @@ export default function FloatingOrdersButton() {
             />
 
             <div
-              className="absolute right-0 bottom-full mb-3 w-[calc(100vw-32px)] max-w-sm sm:w-80 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden"
-              style={{ maxHeight: "75vh" }}
+              className="absolute right-0 bottom-full mb-3 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden"
+              style={{
+                width: "min(calc(100vw - 24px), 360px)",
+                maxHeight: "min(75vh, 600px)",
+              }}
             >
               {/* Header */}
               <div
@@ -544,7 +586,7 @@ export default function FloatingOrdersButton() {
               </div>
 
               {/* Body */}
-              <div className="overflow-y-auto" style={{ maxHeight: "calc(75vh - 56px)" }}>
+              <div className="overflow-y-auto" style={{ maxHeight: "calc(min(75vh, 600px) - 56px)" }}>
 
                 {/* ── STEP: List ── */}
                 {step === "list" && (
