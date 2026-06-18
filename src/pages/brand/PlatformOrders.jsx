@@ -116,10 +116,10 @@ export default function PlatformOrders() {
         {[
           { label: "Total Orders",       val: summary.total_orders    || 0, icon: ShoppingBag,   color: theme.accent  },
           { label: "Active Orders",      val: summary.active_orders   || 0, icon: CheckCircle,   color: "#10B981"     },
-          { label: "Cancelled/Refunded", val: summary.cancelled_orders|| 0, icon: AlertTriangle, color: "#EF4444"     },
+          { label: "Cancelled/Returned", val: summary.cancelled_orders|| 0, icon: AlertTriangle, color: "#EF4444"     },
           { label: "Net Revenue",        val: `PKR ${(summary.total_revenue || 0).toLocaleString()}`, icon: TrendingUp, color: "#10B981" },
-          { label: "Via Loyverse",       val: summary.loyverse_orders || 0, icon: PackageCheck,  color: "#7C3AED"     },
-          { label: "Via Square",         val: summary.square_orders   || 0, icon: PackageCheck,  color: "#2563EB"     },
+          { label: "Total Refunded",     val: `PKR ${(summary.total_refunded || 0).toLocaleString()}`, icon: RefreshCw, color: "#F97316" },
+          { label: "Via POS",            val: (summary.loyverse_orders || 0) + (summary.square_orders || 0), icon: PackageCheck, color: "#7C3AED" },
         ].map(({ label, val, icon: Icon, color }) => (
           <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-4">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center mb-2 sm:mb-3"

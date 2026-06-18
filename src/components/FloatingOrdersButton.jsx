@@ -131,21 +131,20 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
   const [activeCat, setActiveCat] = useState("all");
 
   useEffect(() => {
+    if (!oldOrder?.brand_id) return;
     setLoading(true);
     setFetchErr("");
-    // Fetch ALL approved products from main endpoint (guaranteed to work)
-    fetch(`${BASE}/api/products`)
+    // ── FIX: Fetch only this brand's products using server-side filter ──
+    // Avoids loading ALL products across all brands (much faster, correct)
+    fetch(`${BASE}/api/products?brand_id=${oldOrder.brand_id}`)
       .then(r => { if (!r.ok) throw new Error("err"); return r.json(); })
       .then(data => setAllProds(Array.isArray(data) ? data : []))
       .catch(() => { setAllProds([]); setFetchErr("Could not load products."); })
       .finally(() => setLoading(false));
-  }, []);
+  }, [oldOrder?.brand_id]);
 
-  // Filter client-side by brand_id — guaranteed correct
-  const brandProducts = React.useMemo(() => {
-    if (!oldOrder?.brand_id) return allProds;
-    return allProds.filter(p => String(p.brand_id) === String(oldOrder.brand_id));
-  }, [allProds, oldOrder?.brand_id]);
+  // All fetched products are already brand-filtered from server
+  const brandProducts = allProds;
 
   // Build sub-category tabs from brand's products only
   const subCats = React.useMemo(() => {
