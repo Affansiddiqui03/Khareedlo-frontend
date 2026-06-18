@@ -435,47 +435,55 @@ export default function FloatingOrdersButton() {
     finally       { setSubmitting(false); }
   };
 
-  // ── Exchange: new product selected — NOW void old + open BuyNowModal
-  const handleExchangeProductSelected = async (newProduct) => {
+  // ── Exchange: new product selected — save pending, open BuyNowModal FIRST
+  // Old order void hoga ONLY after user confirms new order in BuyNowModal
+  const handleExchangeProductSelected = (newProduct) => {
     const orderToVoid = pendingExchange || activeOrder;
-    setSubmitting(true);
-    try {
-      // 1. Void old order in Khareedlo + POS
-      const res  = await fetch(`${BASE}/api/orders/${orderToVoid.id}/cancel`, {
-        method:  "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ reason: "exchanged", customer_id: user?.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed");
 
-      // 2. Update old order locally
-      setOrders(prev => prev.map(o =>
-        o.id === orderToVoid.id
-          ? { ...o, status: "exchanged", cancelled_at: new Date().toISOString() }
-          : o
-      ));
+    // Just open BuyNowModal — don't touch old order yet
+    setExchangeProduct({
+      ...newProduct,
+      id:         newProduct.id || newProduct.product_id,
+      title:      newProduct.product_name || newProduct.name,
+      brand_id:   newProduct.brand_id,
+      brand:      newProduct.brand || newProduct.brand_name,
+      brand_name: newProduct.brand || newProduct.brand_name,
+      // Carry old order ID so we can void it after confirmation
+      _exchangeVoidOrderId: orderToVoid?.id,
+      _exchangeVoidCustomerId: user?.id,
+    });
 
-      // 3. Open BuyNowModal for new product → creates new order + new POS entry
-      setExchangeProduct({
-        ...newProduct,
-        id:         newProduct.id || newProduct.product_id,
-        title:      newProduct.product_name || newProduct.name,
-        brand_id:   newProduct.brand_id,
-        brand:      newProduct.brand || newProduct.brand_name,
-        brand_name: newProduct.brand || newProduct.brand_name,
-      });
-
-      setOpen(false);
-      resetToList();
-    } catch (err) { showToast(err.message); }
-    finally       { setSubmitting(false); }
+    setOpen(false);
+    resetToList();
   };
 
-  // ── Exchange: new order saved via BuyNowModal ───────────────────
-  const handleExchangeOrderSaved = () => {
-    showToast("Exchange confirmed ✓ New order recorded");
+  // ── Exchange: new order confirmed in BuyNowModal → NOW void old order
+  const handleExchangeOrderSaved = async () => {
+    const voidOrderId    = exchangeProduct?._exchangeVoidOrderId;
+    const voidCustomerId = exchangeProduct?._exchangeVoidCustomerId;
+
     setExchangeProduct(null);
+
+    if (voidOrderId) {
+      try {
+        // Void old order AFTER new order is confirmed
+        await fetch(`${BASE}/api/orders/${voidOrderId}/cancel`, {
+          method:  "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ reason: "exchanged", customer_id: voidCustomerId }),
+        });
+        // Update old order status in local state
+        setOrders(prev => prev.map(o =>
+          o.id === voidOrderId
+            ? { ...o, status: "exchanged", cancelled_at: new Date().toISOString() }
+            : o
+        ));
+      } catch {
+        // Non-blocking — new order is saved regardless
+      }
+    }
+
+    showToast("Exchange confirmed ✓ New order recorded");
     setTimeout(() => fetchOrders(), 800);
   };
 
