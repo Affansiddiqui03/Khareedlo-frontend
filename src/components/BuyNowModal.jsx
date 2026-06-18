@@ -54,6 +54,7 @@ export default function BuyNowModal({ product, onClose, onOrderSaved }) {
           brand_name:   product.brand  || product.brand_name  || "",
           quantity:     qty,
           unit_price:   unitPrice,
+          product_image: product?.image || null,
         }),
       });
       const data = await res.json();
