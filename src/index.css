@@ -161,3 +161,9 @@ img {
   animation: shimmer 4s infinite linear;
   opacity: 0.1;
 }
+
+/* === PASTE AT BOTTOM OF src/index.css === */
+
+/* Hide scrollbar for filter pill rows */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

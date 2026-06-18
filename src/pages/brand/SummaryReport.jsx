@@ -267,6 +267,7 @@ export default function SummaryReport() {
               <h2 className="text-base font-bold text-gray-900 uppercase tracking-wider">Top Performing Products</h2>
             </div>
             <div className="rounded-2xl border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background: `${theme.accent}08` }}>
@@ -301,6 +302,7 @@ export default function SummaryReport() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           </section>
 
