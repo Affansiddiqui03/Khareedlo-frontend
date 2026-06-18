@@ -9,7 +9,7 @@ import {
   useMap, useMapEvent, Circle,
 } from "react-leaflet";
 import L from "leaflet";
-import { haversineKm, fmtKm } from "../utils/geo";
+import { haversineKm, fetchRoadDistances, fmtKm } from "../utils/geo";
 
 // Color-code distance badge: green ≤5km, amber ≤15km, red >15km
 function distanceBadgeStyle(km) {
@@ -177,6 +177,8 @@ export default function Explore() {
   const [userLoc,    setUserLoc]    = useState(null);
   const [flyTarget,  setFlyTarget]  = useState(null); // for user location fly
   const [locLoading, setLocLoading] = useState(false);
+  const [roadDistances, setRoadDistances] = useState(new Map()); // outlet id → road km (OSRM)
+  const [distLoading, setDistLoading] = useState(false);
   const [locError,   setLocError]   = useState("");
   const [pickMode,   setPickMode]   = useState(false);
   const [selected,   setSelected]   = useState(null);
@@ -204,6 +206,16 @@ export default function Explore() {
     if (b) setBrand(b);
     if (q) { setQuery(q); setBrand("all"); }
   }, [searchParams]);
+
+  // Fetch road distances from OSRM whenever user location or outlets change
+  useEffect(() => {
+    if (!userLoc || !allOutlets.length) return;
+    setDistLoading(true);
+    fetchRoadDistances(userLoc, allOutlets).then(distMap => {
+      setRoadDistances(distMap);
+      setDistLoading(false);
+    });
+  }, [userLoc, allOutlets]);
 
   const brands = useMemo(() => [...new Set(allOutlets.map(o => o.brandName))].sort(), [allOutlets]);
   const cities  = useMemo(() => [...new Set(allOutlets.map(o => o.city))].sort(),     [allOutlets]);
@@ -248,19 +260,23 @@ export default function Explore() {
         o.brandName.toLowerCase().includes(q)
       );
     }
-    if (userLoc && radiusKm !== "any") {
-      const r = parseFloat(radiusKm);
-      data = data
-        .map(o => ({ ...o, distance: haversineKm(userLoc, o.coords) }))
-        .filter(o => o.distance <= r)
-        .sort((a, b) => a.distance - b.distance);
-    } else if (userLoc) {
-      data = data
-        .map(o => ({ ...o, distance: haversineKm(userLoc, o.coords) }))
-        .sort((a, b) => a.distance - b.distance);
+    if (userLoc) {
+      // Use OSRM road distance if available, else haversine fallback
+      data = data.map(o => ({
+        ...o,
+        distance: roadDistances.has(o.id)
+          ? roadDistances.get(o.id)
+          : haversineKm(userLoc, o.coords),
+        isRoadDist: roadDistances.has(o.id),
+      }));
+      if (radiusKm !== "any") {
+        const r = parseFloat(radiusKm);
+        data = data.filter(o => o.distance <= r);
+      }
+      data.sort((a, b) => a.distance - b.distance);
     }
     return data;
-  }, [allOutlets, brand, city, radiusKm, userLoc, query]);
+  }, [allOutlets, brand, city, radiusKm, userLoc, query, roadDistances]);
 
   const mapCenter = userLoc
     ? [userLoc.lat, userLoc.lng]
@@ -341,8 +357,10 @@ export default function Explore() {
             {userLoc && !locError && (
               <p className="mt-2 text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                Location active — outlets sorted by distance from you
-                {radiusKm !== "any" && ` (within ${radiusKm} km)`}
+                {distLoading
+                  ? "Calculating road distances…"
+                  : `Road distances active — sorted nearest to farthest${radiusKm !== "any" ? ` (within ${radiusKm} km)` : ""}`
+                }
               </p>
             )}
             {pickMode && (
@@ -429,9 +447,9 @@ export default function Explore() {
                           {o.distance !== undefined && (() => {
                             const s = distanceBadgeStyle(o.distance);
                             return (
-                              <p style={{ fontSize: 12, fontWeight: 800, marginBottom: 5, display: "flex", alignItems: "center", gap: 4 }}>
+                              <p style={{ fontSize: 12, fontWeight: 800, marginBottom: 5, display: "flex", alignItems: "center", gap: 5 }}>
                                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.dot, display: "inline-block", flexShrink: 0 }}/>
-                                <span style={{ color: s.text }}>{fmtKm(o.distance)} away</span>
+                                <span style={{ color: s.text }}>{fmtKm(o.distance)} by road</span>
                               </p>
                             );
                           })()}
@@ -504,7 +522,7 @@ export default function Explore() {
                           {o.brandName}
                         </span>
                         {userLoc && idx === 0 && o.distance !== undefined && (
-                          <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5 rounded-full ml-1">
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5 rounded-full">
                             Nearest
                           </span>
                         )}
@@ -576,9 +594,11 @@ export default function Explore() {
                     const s = distanceBadgeStyle(selected.distance);
                     return (
                       <div className="rounded-2xl p-3.5" style={{ background: s.bg }}>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: s.dot }}>Distance</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: s.dot }}>Road Distance</p>
                         <p className="text-lg font-extrabold leading-none" style={{ color: s.text }}>{fmtKm(selected.distance)}</p>
-                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: s.text, opacity: 0.75 }}>from your location</p>
+                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: s.text, opacity: 0.75 }}>
+                          {selected.isRoadDist ? "via roads" : "straight line"}
+                        </p>
                       </div>
                     );
                   })()}
