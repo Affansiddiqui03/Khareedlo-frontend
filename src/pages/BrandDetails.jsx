@@ -39,12 +39,12 @@ function getInitials(name = "") {
 function StarDisplay({ rating, count }) {
   const r = Number(rating) || 0;
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 flex-wrap">
       {[1,2,3,4,5].map(s => (
-        <Star key={s} className={`w-4 h-4 ${s <= Math.round(r) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+        <Star key={s} className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${s <= Math.round(r) ? "fill-amber-400 text-amber-400" : "fill-white/30 text-white/30"}`} />
       ))}
-      <span className="text-sm font-semibold text-gray-700 ml-1">{r > 0 ? r.toFixed(1) : "—"}</span>
-      {count > 0 && <span className="text-sm text-gray-400">({count} ratings)</span>}
+      <span className="text-xs sm:text-sm font-semibold text-white ml-1">{r > 0 ? r.toFixed(1) : "—"}</span>
+      {count > 0 && <span className="text-xs sm:text-sm text-white/60">({count} ratings)</span>}
     </div>
   );
 }
@@ -159,7 +159,7 @@ export default function BrandDetails() {
   if (loading) return (
     <div className="bg-gradient-to-b from-[#f7f7ff] to-[#ffb48f] min-h-screen pb-20">
       {/* Hero skeleton */}
-      <div className="relative h-[420px] bg-gray-200 animate-pulse">
+      <div className="relative h-[300px] sm:h-[360px] lg:h-[420px] bg-gray-200 animate-pulse">
         <div className="absolute bottom-8 left-0 right-0">
           <div className="max-w-7xl mx-auto px-6 flex items-center gap-6">
             <div className="w-24 h-24 rounded-2xl bg-gray-300" />
@@ -221,7 +221,7 @@ export default function BrandDetails() {
     <div className="bg-gradient-to-b from-[#f7f7ff] to-[#ffb48f] min-h-screen pb-20">
 
       {/* ── HERO ── */}
-      <div className="relative h-[420px]">
+      <div className="relative h-[300px] sm:h-[360px] lg:h-[420px]">
 
         {/* Banner — use asset image OR gradient fallback */}
         {hasBanner ? (
@@ -240,58 +240,61 @@ export default function BrandDetails() {
 
         <div className="absolute inset-0 bg-black/60" />
 
-        <div className="absolute bottom-8 left-0 right-0">
-          <div className="max-w-7xl mx-auto px-6 flex items-center gap-6 text-white flex-wrap">
+        <div className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-0 right-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-white">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-6">
 
-            {/* Logo — asset or initials fallback */}
-            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white/20 flex-shrink-0 bg-white/10">
-              {hasLogo ? (
-                <img
-                  src={assets.logo}
-                  alt={brand.name}
-                  className="w-full h-full object-contain"
-                  onError={e => {
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-2xl font-black text-white" style="background:rgba(255,255,255,0.2)">${initials}</div>`;
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl font-black text-white"
-                  style={{ background: "rgba(255,255,255,0.2)" }}>
-                  {initials}
+              {/* Logo — asset or initials fallback */}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden border-2 sm:border-4 border-white/20 flex-shrink-0 bg-white/10">
+                {hasLogo ? (
+                  <img
+                    src={assets.logo}
+                    alt={brand.name}
+                    className="w-full h-full object-contain"
+                    onError={e => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-lg sm:text-2xl font-black text-white" style="background:rgba(255,255,255,0.2)">${initials}</div>`;
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-lg sm:text-2xl font-black text-white"
+                    style={{ background: "rgba(255,255,255,0.2)" }}>
+                    {initials}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight truncate">{brand.name}</h1>
+                  <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 flex-shrink-0" />
                 </div>
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-4xl sm:text-5xl font-extrabold">{brand.name}</h1>
-                <ShieldCheck className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-              </div>
-              {brand.city && (
-                <p className="text-white/60 text-sm flex items-center gap-1.5 mt-1">
-                  <Building2 className="w-4 h-4" /> {brand.city}
-                </p>
-              )}
-              {brand.description && (
-                <p className="text-white/80 mt-2 text-sm line-clamp-2 max-w-2xl">{brand.description}</p>
-              )}
-              <div className="mt-3">
-                <StarDisplay rating={avgRating} count={ratingCount} />
+                {brand.city && (
+                  <p className="text-white/60 text-xs sm:text-sm flex items-center gap-1.5 mt-1">
+                    <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {brand.city}
+                  </p>
+                )}
+                <div className="mt-1.5 sm:mt-3">
+                  <StarDisplay rating={avgRating} count={ratingCount} />
+                </div>
               </div>
             </div>
 
-            {/* Rate button */}
+            {brand.description && (
+              <p className="text-white/80 mt-3 text-xs sm:text-sm line-clamp-2 max-w-2xl">{brand.description}</p>
+            )}
+
+            {/* Rate button — own row on mobile so it never overlaps the title */}
             {user?.id && ratingChecked && !alreadyRated && (
               <button
                 onClick={() => setShowRating(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition flex-shrink-0"
+                className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition text-sm w-fit"
               >
                 <Star className="w-4 h-4" /> Rate Brand
               </button>
             )}
             {user?.id && alreadyRated && (
-              <span className="text-white/70 text-sm flex items-center gap-1 flex-shrink-0">
+              <span className="mt-3 text-white/70 text-sm flex items-center gap-1 w-fit">
                 <Star className="w-4 h-4 fill-amber-300 text-amber-300" /> You've rated this brand
               </span>
             )}
