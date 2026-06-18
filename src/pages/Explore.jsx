@@ -10,6 +10,13 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { haversineKm, fmtKm } from "../utils/geo";
+
+// Color-code distance badge: green ≤5km, amber ≤15km, red >15km
+function distanceBadgeStyle(km) {
+  if (km <= 5)  return { bg: "#DCFCE7", text: "#15803D", dot: "#22C55E" };
+  if (km <= 15) return { bg: "#FEF9C3", text: "#A16207", dot: "#EAB308" };
+  return          { bg: "#FEE2E2", text: "#B91C1C", dot: "#EF4444" };
+}
 import { useSearchParams, Link } from "react-router-dom";
 import {
   MapPin, LocateFixed, Store, Clock,
@@ -419,9 +426,15 @@ export default function Explore() {
                           </div>
                           <p style={{ fontSize: 14, fontWeight: 800, marginBottom: 3, color:"#111" }}>{o.outletName}</p>
                           <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 5 }}>{o.address}</p>
-                          {o.distance !== undefined && (
-                            <p style={{ fontSize: 12, fontWeight: 700, color: "#3B82F6", marginBottom: 3 }}>📍 {fmtKm(o.distance)} away</p>
-                          )}
+                          {o.distance !== undefined && (() => {
+                            const s = distanceBadgeStyle(o.distance);
+                            return (
+                              <p style={{ fontSize: 12, fontWeight: 800, marginBottom: 5, display: "flex", alignItems: "center", gap: 4 }}>
+                                <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.dot, display: "inline-block", flexShrink: 0 }}/>
+                                <span style={{ color: s.text }}>{fmtKm(o.distance)} away</span>
+                              </p>
+                            );
+                          })()}
                           <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>🕐 {o.hours}</p>
                           {o.phone && <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>📞 {o.phone}</p>}
                           <a href={`https://www.google.com/maps/dir/?api=1&destination=${o.coords.lat},${o.coords.lng}`}
@@ -478,7 +491,7 @@ export default function Explore() {
                     <p className="font-bold text-gray-500 text-sm">No outlets match your filters</p>
                     <p className="text-gray-400 text-xs mt-1">Try changing brand, city, or radius</p>
                   </div>
-                ) : filteredOutlets.map(o => (
+                ) : filteredOutlets.map((o, idx) => (
                   <div key={o.id} onClick={() => handleOutletClick(o)}
                     className={`bg-white rounded-2xl border p-4 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 ${
                       selected?.id === o.id ? "ring-2 shadow-md" : "border-gray-100"
@@ -490,12 +503,22 @@ export default function Explore() {
                         <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: brandColor(o.brandName) }}>
                           {o.brandName}
                         </span>
+                        {userLoc && idx === 0 && o.distance !== undefined && (
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5 rounded-full ml-1">
+                            Nearest
+                          </span>
+                        )}
                       </div>
-                      {o.distance !== undefined && (
-                        <span className="text-[11px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0">
-                          {fmtKm(o.distance)}
-                        </span>
-                      )}
+                      {o.distance !== undefined && (() => {
+                        const s = distanceBadgeStyle(o.distance);
+                        return (
+                          <span className="flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full flex-shrink-0"
+                            style={{ background: s.bg, color: s.text }}>
+                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.dot }} />
+                            {fmtKm(o.distance)}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <h4 className="font-bold text-gray-900 text-sm leading-snug">{o.outletName}</h4>
                     <div className="mt-2 space-y-1">
@@ -549,12 +572,16 @@ export default function Explore() {
                       <a href={`tel:${selected.phone}`} className="text-sm font-bold text-gray-800 hover:text-blue-600">{selected.phone}</a>
                     </div>
                   )}
-                  {selected.distance !== undefined && (
-                    <div className="bg-blue-50 rounded-2xl p-3.5">
-                      <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider mb-1">Distance</p>
-                      <p className="text-sm font-extrabold text-blue-700">{fmtKm(selected.distance)} away</p>
-                    </div>
-                  )}
+                  {selected.distance !== undefined && (() => {
+                    const s = distanceBadgeStyle(selected.distance);
+                    return (
+                      <div className="rounded-2xl p-3.5" style={{ background: s.bg }}>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: s.dot }}>Distance</p>
+                        <p className="text-lg font-extrabold leading-none" style={{ color: s.text }}>{fmtKm(selected.distance)}</p>
+                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: s.text, opacity: 0.75 }}>from your location</p>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
