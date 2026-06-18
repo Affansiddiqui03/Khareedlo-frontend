@@ -134,46 +134,21 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
     setLoading(true);
     setFetchErr("");
 
-    const brandId   = oldOrder?.brand_id;
-    const brandName = (oldOrder?.brand_name || "").toLowerCase().trim();
-
-    // Strategy 1: fetch by brand_id (most reliable)
-    // Strategy 2: if brand_id missing/invalid, fetch ALL and filter by brand_name
-    const primary = brandId
-      ? fetch(`${BASE}/api/products/brand/${brandId}`)
-          .then(r => { if (!r.ok) throw new Error("not ok"); return r.json(); })
-      : Promise.reject(new Error("no brand_id"));
-
-    primary
+    // Fetch ALL approved products — simplest approach, always works
+    // User can search by name or filter by sub-category
+    fetch(`${BASE}/api/products`)
+      .then(r => { if (!r.ok) throw new Error("API error"); return r.json(); })
       .then(data => {
         const list = Array.isArray(data) ? data : [];
-        if (list.length > 0) { setProducts(list); return; }
-        // brand_id returned empty → fallback to all products
-        throw new Error("empty");
+        setProducts(list);
+        if (list.length === 0) setFetchErr("No products available.");
       })
       .catch(() => {
-        // Fallback: use dedicated brand-name search endpoint
-        if (!brandName) {
-          setProducts([]);
-          setFetchErr("Brand information missing. Try refreshing.");
-          setLoading(false);
-          return;
-        }
-        return fetch(`${BASE}/api/products/by-brand-name?name=${encodeURIComponent(oldOrder?.brand_name || "")}`)
-          .then(r => r.json())
-          .then(all => {
-            const list = Array.isArray(all) ? all : [];
-            setProducts(list);
-            if (list.length === 0) setFetchErr("No approved products found for this brand.");
-          })
-          .catch(() => {
-            setProducts([]);
-            setFetchErr("Could not load products. Check your connection.");
-          });
+        setProducts([]);
+        setFetchErr("Could not load products. Check connection.");
       })
       .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oldOrder?.brand_id, oldOrder?.brand_name]);
+  }, []);
 
   // Build sub-category tabs from loaded products
   const subCats = React.useMemo(() => {
@@ -186,11 +161,13 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
   }, [products]);
 
   const filtered = products.filter(p => {
-    const name = (p.product_name || p.name || "").toLowerCase();
-    const matchSearch = !search || name.includes(search.toLowerCase());
+    const name  = (p.product_name || p.name || "").toLowerCase();
+    const brand = (p.brand || p.brand_name || "").toLowerCase();
+    const q     = search.toLowerCase();
+    const matchSearch = !search || name.includes(q) || brand.includes(q);
     const matchCat = activeCat === "all" || String(p.sub_category_id) === activeCat;
     return matchSearch && matchCat;
-  });
+  }).slice(0, 30);
 
   return (
     <div className="p-4">
@@ -214,7 +191,7 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search product name…"
+          placeholder="Search by product or brand name…"
           className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-red-200 bg-gray-50"
         />
       </div>
@@ -288,8 +265,9 @@ function ExchangeProductPicker({ oldOrder, onProductSelected, onBack }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-gray-800 line-clamp-2 leading-tight">{name}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">{p.brand || p.brand_name}</p>
                   {p.sub_category_name && (
-                    <p className="text-[10px] text-purple-500 font-semibold mt-0.5">{p.sub_category_name}</p>
+                    <p className="text-[10px] text-purple-500 font-semibold">{p.sub_category_name}</p>
                   )}
                   <p className="text-[11px] font-black text-red-600 mt-0.5">
                     PKR {Number(p.price).toLocaleString()}
