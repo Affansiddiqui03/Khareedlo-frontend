@@ -1,82 +1,51 @@
 // src/contexts/CartContext.js
-// Cart is now synced to the backend DB so mobile & desktop always match.
-// Flow:
-//   Login  → fetch cart from /api/cart (DB)
-//   Add/Remove/Clear → update local state → POST /api/cart/sync (DB)
-//   Logout → clear local state (DB copy stays for next login)
+// PER-USER CART — each customer has their own cart keyed by user ID
+// No quantity increase/decrease — just add & remove (redirect-based platform)
 
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
-const BASE = "https://khareedlo-backend-production.up.railway.app";
-
-// Read JWT token from wherever it's stored
-function getToken() {
-  return localStorage.getItem("token") || sessionStorage.getItem("token") || null;
-}
-
-function authHeaders() {
-  const token = getToken();
-  return token ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-               : { "Content-Type": "application/json" };
-}
+// Key is per-user so carts never mix
+const cartKey = (userId) => userId ? `khareedlo_cart_${userId}` : null;
 
 export function CartProvider({ children }) {
   const { user } = useAuth();
   const [cart, setCart] = useState([]);
-  const [cartLoading, setCartLoading] = useState(false);
 
-  // Track latest cart for the sync debounce
-  const cartRef = useRef(cart);
-  cartRef.current = cart;
-
-  // Debounce timer ref so we don't spam the backend on rapid changes
-  const syncTimer = useRef(null);
-
-  // ── Load cart from DB when user logs in ───────────────────
+  // Load this user's cart when user changes (login/logout/switch)
   useEffect(() => {
-    if (!user?.id) {
-      setCart([]);   // Guest / logged-out → empty
+    const key = cartKey(user?.id);
+    if (!key) {
+      setCart([]);   // Guest — empty cart
       return;
     }
-
-    setCartLoading(true);
-    fetch(`${BASE}/api/cart`, { headers: authHeaders() })
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setCart(Array.isArray(data) ? data : []))
-      .catch(() => setCart([]))
-      .finally(() => setCartLoading(false));
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "[]");
+      setCart(Array.isArray(saved) ? saved : []);
+    } catch {
+      setCart([]);
+    }
   }, [user?.id]);
 
-  // ── Sync cart to DB whenever it changes (debounced 600ms) ─
-  // This runs after any add/remove/clear so mobile & desktop stay in sync
+  // Persist whenever cart changes
   useEffect(() => {
-    if (!user?.id) return;       // Don't sync guest cart
-    if (cartLoading) return;     // Don't sync during initial load
+    const key = cartKey(user?.id);
+    if (!key) return;   // Don't persist guest cart
+    localStorage.setItem(key, JSON.stringify(cart));
+  }, [cart, user?.id]);
 
-    clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(() => {
-      fetch(`${BASE}/api/cart/sync`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ cart: cartRef.current }),
-      }).catch(() => {});  // Best-effort — local state is source of truth
-    }, 600);
-
-    return () => clearTimeout(syncTimer.current);
-  }, [cart, user?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Add product ───────────────────────────────────────────
+  // ── Add product to cart (no duplicates — same product just stays) ──
   const addToCart = (product) => {
-    if (!user) return;
+    if (!user) return;   // Must be logged in
 
     const pid = String(product.product_id || product.id);
 
-    setCart(prev => {
-      if (prev.find(i => String(i.product_id) === pid)) return prev;  // already there
+    setCart((prev) => {
+      const already = prev.find((i) => String(i.product_id) === pid);
+      if (already) return prev;   // Already in cart, don't add again
 
       return [
         ...prev,
@@ -94,27 +63,33 @@ export function CartProvider({ children }) {
     });
   };
 
-  // ── Remove product ────────────────────────────────────────
+  // ── Remove a product from cart ──
   const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(i => String(i.product_id) !== String(productId)));
+    setCart((prev) => prev.filter((i) => String(i.product_id) !== String(productId)));
   };
 
-  // ── Clear all ─────────────────────────────────────────────
+  // ── Clear full cart ──
   const clearCart = () => setCart([]);
 
-  // ── Check membership ──────────────────────────────────────
+  // ── Check if product is already in cart ──
   const isInCart = (productId) =>
-    cart.some(i => String(i.product_id) === String(productId));
+    cart.some((i) => String(i.product_id) === String(productId));
 
   const totalItems = cart.length;
   const totalPrice = cart.reduce((sum, i) => sum + (Number(i.price) || 0), 0);
 
   return (
-    <CartContext.Provider value={{
-      cart, cartLoading,
-      addToCart, removeFromCart, clearCart,
-      isInCart, totalItems, totalPrice,
-    }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        isInCart,
+        totalItems,
+        totalPrice,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
